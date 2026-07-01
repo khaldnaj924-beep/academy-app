@@ -97,6 +97,15 @@ def invalidate_cache():
         _cache['sheet_values'] = None
         _cache['sheet_ts'] = 0
 
+def _send_absence_webhooks(webhook_url, payloads):
+    """إرسال تنبيهات الغياب للـ Webhook في مسار خلفي دون تعطيل استجابة الواجهة."""
+    import requests as http_requests
+    for payload in payloads:
+        try:
+            http_requests.post(webhook_url, json=payload, timeout=5)
+        except Exception:
+            pass
+
 # مسار عرض لوحة الإدارة وحساب الإحصائيات الديناميكية
 @app.route('/dashboard')
 def view_dashboard():
@@ -402,6 +411,38 @@ def save_dashboard():
                 attendance_sheet.append_rows(attendance_rows)
             invalidate_cache()
 
+        # 🔔 إرسال تنبيهات الغياب في الخلفية (لا يبطئ الاستجابة)
+        def _send_webhooks(players_snapshot, date_snapshot, cached_snapshot):
+            import requests as http_requests
+            WEBHOOK_URL = "https://n8n.roboualain.site/webhook/e71b2af4-d593-45ae-b86a-a5ff4226c075"
+            for p in players_snapshot:
+                status = p.get('status', '')
+                if status not in ('غائب', 'حاضر'):
+                    continue
+                try:
+                    ridx = int(p.get('row_index', 0))
+                    row_data = cached_snapshot[ridx - 1] if 0 < ridx <= len(cached_snapshot) else []
+                    phone = row_data[3] if len(row_data) > 3 else ""
+                    http_requests.post(WEBHOOK_URL, json={
+                        "name": p.get('name', ''),
+                        "phone": phone,
+                        "date": date_snapshot,
+                        "status": status
+                    }, timeout=8)
+                except Exception as ex:
+                    print(f"[Webhook] فشل الإرسال: {ex}")
+
+        try:
+            cached_snap = get_sheet_values_cached()
+            t = threading.Thread(
+                target=_send_webhooks,
+                args=(list(players), date, cached_snap),
+                daemon=True
+            )
+            t.start()
+        except Exception as ex:
+            print(f"[Webhook Thread] خطأ: {ex}")
+
         return jsonify({
             "success": True,
             "message": f"تم حفظ {len(attendance_rows)} سجل ميداني بنجاح! 🏆"
@@ -411,6 +452,60 @@ def save_dashboard():
         if 'quota' in msg.lower() or '429' in msg:
             return jsonify({"success": False, "message": "تم تجاوز الحد المسموح به من Google API. حاول بعد دقيقة."}), 429
         return jsonify({"success": False, "message": f"خطأ في Google Sheets: {msg}"}), 502
+    except Exception as e:
+        return jsonify({"success": False, "message": str(e)}), 500
+
+@app.route('/send_notification', methods=['POST'])
+def send_notification():
+    err = require_sheet()
+    if err: return err
+    try:
+        import requests as http_requests
+        data = request.get_json(silent=True)
+        if not data:
+            return jsonify({"success": False, "message": "البيانات غير صالحة"}), 400
+
+        notif_type = sanitize_input(data.get('type', ''), max_len=50)
+        target = sanitize_input(data.get('target', 'الكل'), max_len=50)
+        message = sanitize_input(data.get('message', ''), max_len=500)
+
+        WEBHOOK_URL = "https://n8n.roboualain.site/webhook/e71b2af4-d593-45ae-b86a-a5ff4226c075"
+
+        all_records = get_sheet_values_cached()
+        sent = 0
+        for row in all_records[1:]:
+            if len(row) >= 7 and row[6] == 'Approved':
+                if target != 'الكل':
+                    dob_raw = row[2] if len(row) > 2 else ""
+                    birth_year = ""
+                    if dob_raw:
+                        parts = dob_raw.replace("-", "/").split("/")
+                        if len(parts) == 3:
+                            birth_year = parts[0] if len(parts[0]) == 4 else parts[2]
+                        elif len(parts) == 1:
+                            birth_year = parts[0]
+                    category = get_age_category(birth_year)
+                    if category != target:
+                        continue
+
+                phone = row[3] if len(row) > 3 else ""
+                name = row[1] if len(row) > 1 else ""
+                if not phone:
+                    continue
+
+                try:
+                    http_requests.post(WEBHOOK_URL, json={
+                        "name": name,
+                        "phone": phone,
+                        "type": notif_type,
+                        "message": message,
+                        "status": "إشعار"
+                    }, timeout=5)
+                    sent += 1
+                except Exception:
+                    pass
+
+        return jsonify({"success": True, "message": f"تم إرسال الإشعار لـ {sent} ولي أمر ✅"}), 200
     except Exception as e:
         return jsonify({"success": False, "message": str(e)}), 500
 

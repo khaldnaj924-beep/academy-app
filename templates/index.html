@@ -533,48 +533,60 @@
   </section>
 
   <!-- ===== TAB: التنبيهات (مخفي افتراضياً) ===== -->
-  <section id="tab-alerts" class="tab-panel">
-    <section class="hero">
-      <h1>
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:26px;height:26px;vertical-align:-4px;color:var(--gold)"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
-        تنبيهات <span class="accent">الأهالي</span>
-      </h1>
-    </section>
-
-    <div class="alert-box">
-      <div class="panel">
-        <div class="panel-title"><span class="tdot"></span> كتابة تنبيه / إعلان جديد</div>
-
-        <span class="alert-field-label">الفئة المستهدفة</span>
-        <div class="target-group" id="targetGroup" role="radiogroup" aria-label="الفئة المستهدفة">
-          <button type="button" class="target-chip active" role="radio" aria-checked="true"  data-target="الكل">🌐 الكل</button>
-          <button type="button" class="target-chip" role="radio" aria-checked="false" data-target="البراعم">🔵 البراعم</button>
-          <button type="button" class="target-chip" role="radio" aria-checked="false" data-target="الابتدائية">🟢 الابتدائية</button>
-          <button type="button" class="target-chip" role="radio" aria-checked="false" data-target="المتوسطة">🟡 المتوسطة</button>
-          <button type="button" class="target-chip" role="radio" aria-checked="false" data-target="الشباب">🟠 الشباب</button>
-        </div>
-
-        <span class="alert-field-label">نص التنبيه</span>
-        <textarea id="alertText" class="alert-textarea" placeholder="اكتب نص التنبيه أو الإعلان الذي سيصل لأولياء الأمور..."></textarea>
-        <div>
-          <button type="button" class="alert-send" id="alertSend">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="m22 2-7 20-4-9-9-4Z"/><path d="M22 2 11 13"/></svg>
-            إرسال التنبيه
-          </button>
+<section id="tab-alerts" class="tab-panel">
+  <section class="hero">
+    <h1>
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:26px;height:26px;vertical-align:-4px;color:var(--gold)"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+      إشعارات <span class="accent">الأهالي</span>
+    </h1>
+  </section>
+  <div class="alert-box">
+    <div class="panel">
+      <div class="panel-title"><span class="tdot"></span> إرسال إشعار جديد</div>
+      <span class="alert-field-label" style="margin-top:18px">نوع الإشعار</span>
+      <div class="target-group" id="notifTypeGroup" role="radiogroup">
+        <button type="button" class="target-chip active" data-type="لا يوجد تمرين">🚫 لا يوجد تمرين</button>
+        <button type="button" class="target-chip" data-type="مباراة">⚽ مباراة</button>
+        <button type="button" class="target-chip" data-type="إشعار عام">📢 إشعار عام</button>
+      </div>
+      <div id="matchDetails" style="display:none;margin-bottom:16px">
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+          <div>
+            <span class="alert-field-label">وقت المباراة</span>
+            <input type="time" id="matchTime" class="alert-textarea" style="min-height:unset;height:54px;padding:0 16px">
+          </div>
+          <div>
+            <span class="alert-field-label">مكان المباراة</span>
+            <input type="text" id="matchLocation" class="alert-textarea" style="min-height:unset;height:54px;padding:0 16px" placeholder="مثال: ملعب الأكاديمية">
+          </div>
         </div>
       </div>
-
-      <div class="alert-log">
-        <div class="alert-log-title">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:15px;height:15px;color:var(--gold)"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>
-          آخر التنبيهات المرسلة
-        </div>
-        <div id="alertList">
-          <div class="alert-empty">لا توجد تنبيهات مرسلة بعد.</div>
-        </div>
+      <span class="alert-field-label">الفئة المستهدفة</span>
+      <div class="target-group" id="targetGroup" role="radiogroup">
+        <button type="button" class="target-chip active" data-target="الكل">🌐 الكل</button>
+        <button type="button" class="target-chip" data-target="البراعم">🔵 البراعم</button>
+        <button type="button" class="target-chip" data-target="الابتدائية">🟢 الابتدائية</button>
+        <button type="button" class="target-chip" data-target="المتوسطة">🟡 المتوسطة</button>
+      </div>
+      <span class="alert-field-label">ملاحظة إضافية (اختياري)</span>
+      <textarea id="alertText" class="alert-textarea" style="min-height:100px" placeholder="أضف أي تفاصيل إضافية..."></textarea>
+      <div style="display:flex;align-items:center;gap:14px;flex-wrap:wrap">
+        <button type="button" class="alert-send" id="alertSend">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="m22 2-7 20-4-9-9-4Z"/><path d="M22 2 11 13"/></svg>
+          إرسال الإشعار
+        </button>
+        <span id="alertStatus" style="font-size:14px;font-weight:700;color:var(--muted)"></span>
       </div>
     </div>
-  </section>
+    <div class="alert-log">
+      <div class="alert-log-title">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:15px;height:15px;color:var(--gold)"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>
+        آخر الإشعارات المرسلة
+      </div>
+      <div id="alertList"><div class="alert-empty">لا توجد إشعارات مرسلة بعد.</div></div>
+    </div>
+  </div>
+</section>
 
 </main>
 
@@ -675,19 +687,30 @@
   // ===== التنبيهات: إرسال تنبيه وإضافته لسجل آخر التنبيهات =====
   function escapeHtml(s){return String(s).replace(/[&<>"']/g,function(c){
     return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];});}
-  var alertText=document.getElementById('alertText'),
+  var notifTypeGroup=document.getElementById('notifTypeGroup'),
+      targetGroup=document.getElementById('targetGroup'),
+      matchDetails=document.getElementById('matchDetails'),
       alertSend=document.getElementById('alertSend'),
+      alertStatus=document.getElementById('alertStatus'),
       alertList=document.getElementById('alertList'),
-      targetGroup=document.getElementById('targetGroup');
+      alertText=document.getElementById('alertText'),
+      selectedType='لا يوجد تمرين',
+      selectedTarget='الكل';
 
-  // اختيار الفئة المستهدفة (سلوك Radio: خيار واحد فقط نشط)
-  var selectedTarget='الكل';
+  if(notifTypeGroup){
+    notifTypeGroup.addEventListener('click',function(e){
+      var chip=e.target.closest('.target-chip');if(!chip)return;
+      notifTypeGroup.querySelectorAll('.target-chip').forEach(function(c){c.classList.remove('active');});
+      chip.classList.add('active');
+      selectedType=chip.getAttribute('data-type');
+      matchDetails.style.display=selectedType==='مباراة'?'block':'none';
+    });
+  }
   if(targetGroup){
     targetGroup.addEventListener('click',function(e){
-      var chip=e.target.closest('.target-chip'); if(!chip) return;
-      targetGroup.querySelectorAll('.target-chip').forEach(function(c){
-        c.classList.remove('active'); c.setAttribute('aria-checked','false');});
-      chip.classList.add('active'); chip.setAttribute('aria-checked','true');
+      var chip=e.target.closest('.target-chip');if(!chip)return;
+      targetGroup.querySelectorAll('.target-chip').forEach(function(c){c.classList.remove('active');});
+      chip.classList.add('active');
       selectedTarget=chip.getAttribute('data-target');
     });
   }
@@ -724,20 +747,37 @@
 
   if(alertSend){
     alertSend.addEventListener('click',function(){
-      var msg=(alertText.value||'').trim();
-      if(!msg){ alertText.focus(); alertText.style.borderColor='var(--red)';
-        setTimeout(function(){alertText.style.borderColor='';},1200); return; }
-      var empty=alertList.querySelector('.alert-empty'); if(empty) empty.remove();
-      var now=new Date();
-      var stamp=now.toLocaleDateString('ar-SA')+' — '+
-                now.toLocaleTimeString('ar-SA',{hour:'2-digit',minute:'2-digit'});
-      var item=document.createElement('div');
-      item.className='alert-item';
-      item.innerHTML='<div class="a-text">'+escapeHtml(msg)+
-                     '<span class="a-target">🎯 '+escapeHtml(selectedTarget)+'</span></div>'+
-                     '<span class="a-date">🔔 '+escapeHtml(stamp)+'</span>';
-      alertList.insertBefore(item, alertList.firstChild); // الأحدث في الأعلى
-      alertText.value='';
+      var msg='';
+      if(selectedType==='لا يوجد تمرين'){
+        msg='نعلمكم بأنه لا يوجد تمرين اليوم. '+(alertText.value.trim()||'');
+      }else if(selectedType==='مباراة'){
+        var time=(document.getElementById('matchTime')||{}).value||'';
+        var loc=(document.getElementById('matchLocation')||{}).value||'';
+        msg='يسعدنا إعلامكم بوجود مباراة'+(time?' الساعة '+time:'')+(loc?' في '+loc:'')+'. '+(alertText.value.trim()||'');
+      }else{
+        msg=alertText.value.trim();
+        if(!msg){alertText.focus();alertText.style.borderColor='var(--red)';setTimeout(function(){alertText.style.borderColor='';},1200);return;}
+      }
+      alertSend.disabled=true;
+      alertStatus.textContent='⏳ جاري الإرسال...';
+      alertStatus.style.color='var(--muted)';
+      fetch('/send_notification',{method:'POST',headers:{'Content-Type':'application/json'},
+        body:JSON.stringify({type:selectedType,target:selectedTarget,message:msg})})
+      .then(function(r){return r.json();})
+      .then(function(res){
+        alertSend.disabled=false;
+        if(res.success){
+          alertStatus.textContent='✅ '+res.message;alertStatus.style.color='var(--green)';
+          var empty=alertList.querySelector('.alert-empty');if(empty)empty.remove();
+          var now=new Date();
+          var stamp=now.toLocaleDateString('ar-SA')+' — '+now.toLocaleTimeString('ar-SA',{hour:'2-digit',minute:'2-digit'});
+          var item=document.createElement('div');item.className='alert-item';
+          item.innerHTML='<div class="a-text">'+escapeHtml(msg)+'<span class="a-target">🎯 '+escapeHtml(selectedTarget)+'</span></div>'+'<span class="a-date">🔔 '+escapeHtml(stamp)+'</span>';
+          alertList.insertBefore(item,alertList.firstChild);
+          alertText.value='';setTimeout(function(){alertStatus.textContent='';},4000);
+        }else{alertStatus.textContent='❌ '+res.message;alertStatus.style.color='var(--red)';}
+      })
+      .catch(function(){alertSend.disabled=false;alertStatus.textContent='❌ خطأ في الاتصال بالسيرفر';alertStatus.style.color='var(--red)';});
     });
   }
   var scrim=document.getElementById('scrim'),openBtn=document.getElementById('openRegister'),
