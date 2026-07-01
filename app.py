@@ -116,6 +116,7 @@ def _send_absence_webhooks(webhook_url, payloads):
             pass
 
 # مسار عرض لوحة الإدارة وحساب الإحصائيات الديناميكية
+@app.route('/')
 @app.route('/dashboard')
 def view_dashboard():
     err = require_sheet()
@@ -518,7 +519,7 @@ def send_notification():
     except Exception as e:
         return jsonify({"success": False, "message": str(e)}), 500
 
-@app.route('/')
+@app.route('/attendance')
 def home():
     return render_template('attendance.html')
 if __name__ == '__main__':
