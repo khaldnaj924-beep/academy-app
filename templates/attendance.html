@@ -1,0 +1,744 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>لوحة الإدارة - أكاديمية القوة الرياضية</title>
+    <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;700;900&display=swap" rel="stylesheet">
+    <style>
+        /* المتغيرات والألوان الأساسية */
+        :root {
+            --primary-gold: #d4af37;
+            --shining-gold: #ffd700;
+            --bg-gradient: linear-gradient(135deg, #0a0c10, #111827);
+            --glass-bg: rgba(255, 255, 255, 0.03);
+            --glass-border: rgba(212, 175, 55, 0.2);
+            --text-main: #ffffff;
+            --text-muted: #9ca3af;
+        }
+
+        body { font-family: 'Tajawal', sans-serif; background: var(--bg-gradient); color: var(--text-main); margin: 0; padding: 0; min-height: 100vh; }
+
+        /* إخفاء أسهم الزيادة/النقصان (Spin buttons) لحقول الأرقام في جميع المتصفحات */
+        input[type="number"]::-webkit-outer-spin-button,
+        input[type="number"]::-webkit-inner-spin-button {
+            -webkit-appearance: none; /* Chrome, Edge, Safari */
+            margin: 0;
+        }
+        input[type="number"] {
+            -moz-appearance: textfield; /* Firefox */
+            appearance: textfield;
+        }
+
+        /* القائمة العلوية */
+        .top-navbar { background: rgba(10, 12, 16, 0.95); backdrop-filter: blur(15px); border-bottom: 1px solid var(--glass-border); display: flex; justify-content: space-between; align-items: center; padding: 15px 40px; position: sticky; top: 0; z-index: 1000; }
+        .brand-name { color: var(--primary-gold); font-size: 20px; font-weight: 900; }
+        .nav-links { display: flex; gap: 20px; }
+        .nav-item { color: var(--text-muted); text-decoration: none; font-weight: 700; font-size: 16px; cursor: pointer; padding: 8px 15px; border-radius: 8px; transition: 0.3s; position: relative; white-space: nowrap; display: inline-flex; align-items: center; justify-content: center; gap: 6px; }
+        .nav-item:hover, .nav-item.active { color: var(--shining-gold); background: rgba(212, 175, 55, 0.1); }
+        .nav-icon { font-size: 18px; line-height: 1; }
+        .nav-text { white-space: nowrap; }
+        .badge { position: absolute; top: -5px; right: -5px; background: #ef4444; color: white; font-size: 12px; font-weight: bold; padding: 2px 6px; border-radius: 50%; display: none; }
+        
+        /* الحاوية الرئيسية */
+        .main-container { padding: 40px; max-width: 1200px; margin: 0 auto; }
+        .view-section { display: none; animation: fadeIn 0.4s ease-in-out; }
+        .view-section.active { display: block; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+        /* الواجهة الرئيسية */
+        .home-view { text-align: center; margin-top: 10vh; }
+        .main-logo-text { color: var(--primary-gold); font-size: 70px; font-weight: 900; text-shadow: 0 0 30px rgba(212, 175, 55, 0.3); margin-bottom: 10px; transition: 0.3s; }
+        .sub-logo-text { color: #f3f4f6; font-size: 30px; font-weight: 700; transition: 0.3s; }
+
+        /* البطاقات والشبكة */
+        .cards-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(350px, 1fr)); gap: 20px; margin-top: 20px; }
+        .glass-card { background: var(--glass-bg); border: 1px solid var(--glass-border); border-radius: 12px; padding: 20px; backdrop-filter: blur(10px); position: relative; }
+        h2.section-title { color: var(--shining-gold); border-bottom: 1px solid var(--glass-border); padding-bottom: 15px; margin-top: 0;}
+
+        /* المدخلات والأزرار */
+        input, textarea { width: 100%; padding: 12px; background: rgba(0, 0, 0, 0.3); border: 1px solid var(--glass-border); border-radius: 8px; color: white; font-family: inherit; font-size: 16px; box-sizing: border-box; margin-bottom: 15px; }
+        .action-buttons { display: flex; gap: 10px; margin-top: 15px; }
+        .btn { flex: 1; padding: 10px; border-radius: 8px; border: none; font-weight: 700; font-family: inherit; cursor: pointer; transition: 0.2s; color: white; }
+        .btn-accept { background: #059669; } .btn-accept:hover { background: #047857; }
+        .btn-reject { background: #dc2626; } .btn-reject:hover { background: #b91c1c; }
+        .toggle-btn { background: #374151; color: var(--text-muted); }
+        .toggle-btn.present.active { background: #059669; color: white; }
+        .toggle-btn.absent.active { background: #dc2626; color: white; }
+        .btn-save-main { display: block; width: 100%; max-width: 400px; margin: 40px auto 0; background: linear-gradient(to left, var(--primary-gold), #b8860b); color: #000; padding: 18px; border: none; border-radius: 12px; font-size: 18px; font-weight: 900; cursor: pointer; }
+
+        /* شريط التقدم والتنبيهات */
+        .sub-progress-bar { width: 100%; background: #374151; border-radius: 5px; height: 10px; margin-top: 10px; overflow: hidden; }
+        .sub-progress-fill { height: 100%; transition: width 0.5s; }
+        .auto-alert-badge { font-size: 12px; background: rgba(255, 255, 255, 0.1); padding: 4px 8px; border-radius: 4px; color: #d1d5db; display: inline-flex; align-items: center; gap: 5px; margin-top: 15px;}
+
+        /* ترتيب خاص لأزرار التحضير لتسهيل التحكم فيها بالشاشات */
+        .attendance-item { display: flex; justify-content: space-between; align-items: center; gap: 10px; }
+        .attendance-actions { display: flex; gap: 10px; width: 50%; }
+
+        /* ===== أزرار تصفية الفئات العمرية ===== */
+        .filter-bar {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+            margin-bottom: 18px;
+            margin-top: 4px;
+        }
+        .filter-btn {
+            padding: 7px 16px;
+            border-radius: 20px;
+            border: 1.5px solid var(--glass-border);
+            background: rgba(255,255,255,0.04);
+            color: var(--text-muted);
+            font-family: 'Tajawal', sans-serif;
+            font-size: 14px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.2s;
+            white-space: nowrap;
+        }
+        .filter-btn:hover { border-color: var(--primary-gold); color: var(--primary-gold); }
+        .filter-btn.active {
+            background: rgba(212, 175, 55, 0.18);
+            border-color: var(--shining-gold);
+            color: var(--shining-gold);
+            box-shadow: 0 0 10px rgba(212,175,55,0.15);
+        }
+
+        /* ===== شارة الفئة العمرية داخل البطاقة ===== */
+        .category-chip {
+            display: inline-block;
+            font-size: 11px;
+            font-weight: 700;
+            padding: 3px 10px;
+            border-radius: 12px;
+            margin-bottom: 8px;
+            letter-spacing: 0.3px;
+        }
+        .cat-براعم    { background: rgba(59,130,246,0.18); color: #60a5fa; border: 1px solid rgba(59,130,246,0.35); }
+        .cat-ابتدائية { background: rgba(16,185,129,0.18); color: #34d399; border: 1px solid rgba(16,185,129,0.35); }
+        .cat-متوسطة  { background: rgba(245,158,11,0.18); color: #fbbf24; border: 1px solid rgba(245,158,11,0.35); }
+        .cat-default  { background: rgba(156,163,175,0.12); color: #9ca3af; border: 1px solid rgba(156,163,175,0.25); }
+
+        /* ===== زر تجديد الاشتراك ===== */
+        .btn-renew {
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            margin-top: 14px;
+            padding: 8px 18px;
+            border-radius: 20px;
+            border: 1.5px solid var(--primary-gold);
+            background: rgba(212, 175, 55, 0.08);
+            color: var(--shining-gold);
+            font-family: 'Tajawal', sans-serif;
+            font-size: 13px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.25s ease;
+            letter-spacing: 0.2px;
+        }
+        .btn-renew:hover {
+            background: rgba(212, 175, 55, 0.22);
+            border-color: var(--shining-gold);
+            box-shadow: 0 0 14px rgba(212, 175, 55, 0.25);
+            transform: translateY(-1px);
+        }
+        .btn-renew:active { transform: translateY(0); }
+        /* حالة "جارٍ التجديد" أثناء انتظار الرد */
+        .btn-renew.loading {
+            opacity: 0.6;
+            pointer-events: none;
+        }
+        /* حالة "تم التجديد" بعد النجاح */
+        .btn-renew.renewed {
+            border-color: #059669;
+            color: #34d399;
+            background: rgba(5, 150, 105, 0.12);
+            pointer-events: none;
+        }
+
+        /* ========================================= */
+        /* 📱 تصميم الجوال (Mobile Native App Style) */
+        /* ========================================= */
+        @media (max-width: 768px) {
+            /* 1) منع السحب الأفقي نهائياً */
+            html, body {
+                overflow-x: hidden;
+                width: 100%;
+                max-width: 100%;
+            }
+
+            /* 2) تحويل القائمة العلوية إلى شريط سفلي ثابت (Bottom Tab Bar) */
+            .top-navbar {
+                position: fixed;
+                top: auto;
+                bottom: 0;
+                left: 0;
+                right: 0;
+                width: 100%;
+                flex-direction: row;
+                justify-content: center;
+                align-items: center;
+                padding: 0;
+                gap: 0;
+                border-bottom: none;
+                border-top: 1px solid var(--glass-border);
+                background: rgba(10, 12, 16, 0.98);
+                backdrop-filter: blur(20px);
+                -webkit-backdrop-filter: blur(20px);
+                box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.5);
+                z-index: 1000;
+                /* رفع الشريط عن حافة الشاشة وشريط السحب في الآيفون */
+                padding-bottom: calc(22px + env(safe-area-inset-bottom));
+            }
+
+            /* إخفاء اسم البراند من الشريط السفلي ليصبح شريط تبويبات نقي */
+            .brand-name {
+                display: none;
+            }
+
+            /* جعل جميع أزرار التنقل في صف واحد متساوٍ تماماً ومنع الالتفاف نهائياً */
+            .nav-links {
+                display: flex;
+                flex-wrap: nowrap;          /* صف واحد فقط لا غير */
+                width: 100%;
+                gap: 0;
+                justify-content: space-between;
+                align-items: stretch;
+                padding: 6px 2px;
+                overflow: visible;
+            }
+
+            /* 3) كل زر = أيقونة فوق الكلمة، عرض متساوٍ، وسطر مفرد مضمون */
+            .nav-item {
+                flex: 1 1 0;
+                min-width: 0;
+                display: flex;
+                flex-direction: column;     /* الأيقونة فوق الكلمة بشكل منظم */
+                align-items: center;
+                justify-content: center;
+                text-align: center;
+                gap: 3px;
+                font-size: 11px;
+                font-weight: 600;
+                padding: 8px 1px;           /* حشو جانبي بسيط جداً ليستقر الصف */
+                border-radius: 10px;
+                /* منع نزول أي كلمة أو أيقونة تحت الأخرى نهائياً */
+                white-space: nowrap;
+                word-break: keep-all;
+                overflow-wrap: normal;
+                line-height: 1.15;
+            }
+
+            /* الأيقونة (الصراف 💳 وغيرها) ثابتة فوق الكلمة وبحجم منظم */
+            .nav-icon {
+                font-size: 17px;
+                line-height: 1;
+            }
+
+            /* الكلمة العربية على سطر واحد كامل دون قصّ */
+            .nav-text {
+                font-size: 11px;
+                white-space: nowrap;
+                line-height: 1.1;
+            }
+
+            .nav-item.active {
+                background: rgba(212, 175, 55, 0.15);
+                box-shadow: inset 0 0 0 1px rgba(212, 175, 55, 0.3);
+            }
+
+            /* تعديل موقع شارة العداد لتناسب الشريط السفلي */
+            .badge {
+                top: 0;
+                right: 50%;
+                transform: translateX(50%);
+                font-size: 9px;
+                padding: 1px 5px;
+                line-height: 1.2;
+            }
+
+            /* 4) مساحة سفلية كافية بالحاوية الرئيسية لتجنب تغطية الشريط للمحتوى */
+            .main-container {
+                padding: 15px 15px 150px 15px;
+                margin: 0 auto;
+            }
+
+            /* 5) تصغير العناوين الرئيسية */
+            .main-logo-text { font-size: 36px; line-height: 1.2; }
+            .sub-logo-text { font-size: 20px; }
+            h2.section-title { font-size: 18px; padding-bottom: 12px; }
+            .home-view { margin-top: 6vh; }
+
+            /* ترتيب البطاقات عمودياً (فوق بعضها) */
+            .cards-grid {
+                grid-template-columns: 1fr;
+                gap: 12px;
+            }
+            .glass-card { padding: 15px; }
+
+            /* ترتيب أزرار التحضير والطلبات عمودياً */
+            .attendance-item {
+                flex-direction: column;
+                text-align: center;
+                gap: 8px;
+            }
+            .attendance-actions {
+                width: 100%;
+                margin-top: 8px;
+            }
+            .action-buttons {
+                flex-direction: column;
+            }
+            .btn {
+                width: 100%;
+            }
+
+            /* زر الحفظ الرئيسي */
+            .btn-save-main {
+                margin: 25px auto 0;
+                padding: 15px;
+                font-size: 16px;
+            }
+
+            /* المدخلات */
+            input, textarea {
+                font-size: 15px;
+                padding: 11px;
+            }
+
+            /* أزرار التصفية على الجوال */
+            .filter-bar {
+                gap: 6px;
+            }
+            .filter-btn {
+                font-size: 12.5px;
+                padding: 6px 12px;
+            }
+        }
+
+        /* ضبط إضافي للشاشات الصغيرة جداً (أقل من 360 بكسل) */
+        @media (max-width: 360px) {
+            .nav-item {
+                font-size: 10px;
+                padding: 8px 1px;
+            }
+            .nav-icon { font-size: 15px; }
+            .nav-text { font-size: 10px; }
+            .main-logo-text { font-size: 30px; }
+            .sub-logo-text { font-size: 17px; }
+        }
+    </style>
+</head>
+<body>
+
+    <nav class="top-navbar">
+        <div class="brand-name">القوة الرياضية</div>
+        <div class="nav-links">
+            <div class="nav-item active" onclick="switchView('home', this)"><span class="nav-icon">🏠</span><span class="nav-text">الرئيسية</span></div>
+            <div class="nav-item" onclick="switchView('requests', this)"><span class="nav-icon">📋</span><span class="nav-text">الطلبات</span><span class="badge" id="requestsBadge">0</span></div>
+            <div class="nav-item" onclick="switchView('subscriptions', this)"><span class="nav-icon">💳</span><span class="nav-text">الاشتراكات</span></div>
+            <div class="nav-item" onclick="switchView('measurements', this)"><span class="nav-icon">⚖️</span><span class="nav-text">القياسات</span></div>
+            <div class="nav-item" onclick="switchView('attendance', this)"><span class="nav-icon">✅</span><span class="nav-text">التحضير</span></div>
+            <div class="nav-item" onclick="switchView('alerts', this)"><span class="nav-icon">🔔</span><span class="nav-text">التنبيهات</span></div>
+        </div>
+    </nav>
+
+    <div class="main-container">
+        <div id="view-home" class="view-section active home-view">
+            <div class="main-logo-text">أكاديمية ربوع العين</div>
+            <div class="sub-logo-text">أكاديمية القوة الرياضية</div>
+        </div>
+
+        <div id="view-requests" class="view-section">
+            <h2 class="section-title">📋 طلبات التسجيل المعلقة</h2>
+            <div class="cards-grid" id="requestsContainer"></div>
+        </div>
+
+        <div id="view-subscriptions" class="view-section">
+            <h2 class="section-title">💳 حالة الاشتراكات (مرتبة تلقائياً)</h2>
+            <div class="filter-bar" id="subFilterBar">
+                <button class="filter-btn active" onclick="applyFilter('sub', 'الكل', this)">🌐 الكل</button>
+                <button class="filter-btn" onclick="applyFilter('sub', 'البراعم', this)">🔵 البراعم</button>
+                <button class="filter-btn" onclick="applyFilter('sub', 'الابتدائية', this)">🟢 الابتدائية</button>
+                <button class="filter-btn" onclick="applyFilter('sub', 'المتوسطة', this)">🟡 المتوسطة</button>
+            </div>
+            <div class="cards-grid" id="subscriptionsContainer"></div>
+        </div>
+
+        <div id="view-measurements" class="view-section">
+            <h2 class="section-title">⚖️ القياسات البدنية</h2>
+            <div class="filter-bar" id="measFilterBar">
+                <button class="filter-btn active" onclick="applyFilter('meas', 'الكل', this)">🌐 الكل</button>
+                <button class="filter-btn" onclick="applyFilter('meas', 'البراعم', this)">🔵 البراعم</button>
+                <button class="filter-btn" onclick="applyFilter('meas', 'الابتدائية', this)">🟢 الابتدائية</button>
+                <button class="filter-btn" onclick="applyFilter('meas', 'المتوسطة', this)">🟡 المتوسطة</button>
+            </div>
+            <div class="cards-grid" id="measurementsContainer"></div>
+        </div>
+
+        <div id="view-attendance" class="view-section">
+            <h2 class="section-title">✅ التحضير الميداني</h2>
+            <div class="filter-bar" id="attFilterBar">
+                <button class="filter-btn active" onclick="applyFilter('att', 'الكل', this)">🌐 الكل</button>
+                <button class="filter-btn" onclick="applyFilter('att', 'البراعم', this)">🔵 البراعم</button>
+                <button class="filter-btn" onclick="applyFilter('att', 'الابتدائية', this)">🟢 الابتدائية</button>
+                <button class="filter-btn" onclick="applyFilter('att', 'المتوسطة', this)">🟡 المتوسطة</button>
+            </div>
+            <div class="cards-grid" id="attendanceContainer"></div>
+            <button class="btn-save-main" onclick="saveAllData()">حفظ جميع البيانات الميدانية 📝</button>
+        </div>
+
+        <div id="view-alerts" class="view-section">
+            <div class="glass-card" style="max-width: 600px; margin: 0 auto;">
+                <h2 class="section-title">📢 إعدادات الحصة</h2>
+                <label>تاريخ الحصة:</label>
+                <input type="date" id="sessionDate">
+                <label>ملاحظات إدارية / تأجيلات:</label>
+                <textarea id="announcements" rows="5"></textarea>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function switchView(viewName, navElement) {
+            document.querySelectorAll('.view-section').forEach(el => el.classList.remove('active'));
+            document.getElementById('view-' + viewName).classList.add('active');
+            document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
+            navElement.classList.add('active');
+        }
+
+        /* ════════════════════════════════════════════════════════
+         * 🛡️ XSS Hardening — كل حقل قادم من السيرفر/قاعدة البيانات
+         * يجب أن يمر عبر escapeHtml قبل دمجه في innerHTML
+         * ════════════════════════════════════════════════════════ */
+        function escapeHtml(value) {
+            if (value === null || value === undefined) return '';
+            const map = { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;', '/': '&#x2F;' };
+            return String(value).replace(/[&<>"'/]/g, ch => map[ch]);
+        }
+
+        document.getElementById('sessionDate').value = new Date().toISOString().split('T')[0];
+        let playersData = [];
+        const attendanceResults = {};
+
+        document.addEventListener('DOMContentLoaded', function() {
+            loadPendingRequests();
+            loadDashboardData();
+        });
+
+        function loadPendingRequests() {
+            fetch('/pending_requests')
+            .then(res => res.json())
+            .then(players => {
+                const container = document.getElementById('requestsContainer');
+                const badge = document.getElementById('requestsBadge');
+                container.innerHTML = '';
+                if(players.length > 0) {
+                    badge.innerText = players.length; badge.style.display = 'inline-block';
+                    players.forEach(p => {
+                        const safeName  = escapeHtml(p.name);
+                        const safePhone = escapeHtml(p.phone);
+                        container.innerHTML += `
+                            <div class="glass-card" id="req-card-${p.row_index}">
+                                <div style="font-size: 18px; font-weight: bold; margin-bottom: 5px;">${safeName}</div>
+                                <div style="color: #9ca3af; margin-bottom: 15px;">📞 ${safePhone}</div>
+                                <div class="action-buttons">
+                                    <button class="btn btn-accept" onclick="processRequest(${p.row_index}, 'Approved', this)">قبول اللاعب</button>
+                                    <button class="btn btn-reject" onclick="processRequest(${p.row_index}, 'Rejected', this)">رفض الطلب</button>
+                                </div>
+                            </div>`;
+                    });
+                } else {
+                    badge.style.display = 'none'; container.innerHTML = '<div style="color: #9ca3af;">لا توجد طلبات جديدة حالياً.</div>';
+                }
+            })
+            .catch(() => {
+                document.getElementById('requestsContainer').innerHTML = '<div style="color:#ef4444;">⚠️ تعذّر الاتصال بالسيرفر</div>';
+            });
+        }
+
+        function processRequest(rowIndex, status, btnEl) {
+            // 🛡️ Idempotency: منع النقر المزدوج
+            if (btnEl) {
+                btnEl.disabled = true;
+                btnEl.parentElement.querySelectorAll('button').forEach(b => b.disabled = true);
+            }
+            fetch('/update_player_status', {
+                method: 'POST', headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ row_index: rowIndex, status: status })
+            }).then(res => res.json()).then(data => {
+                if(data.success) {
+                    document.getElementById(`req-card-${rowIndex}`).style.display = 'none';
+                    loadPendingRequests(); loadDashboardData();
+                } else {
+                    alert('⚠️ ' + data.message);
+                    if (btnEl) btnEl.parentElement.querySelectorAll('button').forEach(b => b.disabled = false);
+                }
+            }).catch(() => {
+                alert('⚠️ تعذّر الاتصال بالسيرفر');
+                if (btnEl) btnEl.parentElement.querySelectorAll('button').forEach(b => b.disabled = false);
+            });
+        }
+
+        function getCategoryChipClass(cat) {
+            if (cat === 'البراعم') return 'cat-براعم';
+            if (cat === 'الابتدائية') return 'cat-ابتدائية';
+            if (cat === 'المتوسطة') return 'cat-متوسطة';
+            return 'cat-default';
+        }
+
+        // حالات الفلترة الحالية لكل قسم
+        const activeFilters = { sub: 'الكل', meas: 'الكل', att: 'الكل' };
+
+        function applyFilter(section, category, btn) {
+            activeFilters[section] = category;
+            // تحديث حالة الأزرار
+            const barId = { sub: 'subFilterBar', meas: 'measFilterBar', att: 'attFilterBar' }[section];
+            document.querySelectorAll(`#${barId} .filter-btn`).forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            // إخفاء/إظهار البطاقات
+            const containerId = { sub: 'subscriptionsContainer', meas: 'measurementsContainer', att: 'attendanceContainer' }[section];
+            document.querySelectorAll(`#${containerId} .glass-card`).forEach(card => {
+                const cardCat = card.dataset.category || '';
+                card.style.display = (category === 'الكل' || cardCat === category) ? '' : 'none';
+            });
+        }
+
+        function loadDashboardData() {
+            fetch('/dashboard_data')
+            .then(res => res.json())
+            .then(players => {
+                playersData = players; // يحتفظ بالترتيب الأصلي من السيرفر (مطابق لـ row_index)
+
+                const measContainer = document.getElementById('measurementsContainer');
+                const attContainer  = document.getElementById('attendanceContainer');
+                const subContainer  = document.getElementById('subscriptionsContainer');
+                measContainer.innerHTML = ''; attContainer.innerHTML = ''; subContainer.innerHTML = '';
+
+                if (players.length === 0) return;
+
+                // حساب الأيام المتبقية أولاً على النسخة الأصلية
+                players.forEach(p => {
+                    p.daysLeft   = -1;
+                    p.daysElapsed = 0;
+                    if (p.join_date) {
+                        const joinDate   = new Date(p.join_date);
+                        const diffTime   = new Date().getTime() - joinDate.getTime();
+                        p.daysElapsed    = Math.floor(diffTime / (1000 * 3600 * 24));
+                        p.daysLeft       = 30 - p.daysElapsed;
+                    }
+                });
+
+                // ✅ إصلاح B6: نُرتّب نسخة مستقلة لقسم الاشتراكات فقط
+                // playersData (المصدر) يبقى بترتيبه الأصلي لضمان تطابق index مع الـ DOM inputs
+                const sortedForSubs = [...players].sort((a, b) => b.daysLeft - a.daysLeft);
+
+                // ✅ ترتيب أبجدي مستقل لقسم التحضير (لا يؤثر على ترتيب القياسات/index)
+                // قسم التحضير يعتمد على row_index فقط، لذا يمكن فرزه بأمان
+                const sortedForAtt = [...players].sort((a, b) =>
+                    (a.name || '').localeCompare(b.name || '', 'ar'));
+
+                // رسم قسم القياسات بالترتيب الأصلي (index = row_index)
+                players.forEach((p, index) => {
+                    const cat       = p.category || 'غير محدد';
+                    const safeName  = escapeHtml(p.name);   // 🛡️ XSS-safe
+                    const safeCat   = escapeHtml(cat);
+                    const chipClass = getCategoryChipClass(cat);
+                    const categoryChip = `<span class="category-chip ${chipClass}">👶 ${safeCat}</span>`;
+
+                    measContainer.innerHTML += `
+                        <div class="glass-card" data-category="${safeCat}">
+                            ${categoryChip}
+                            <div style="font-weight: bold; margin-bottom: 10px;">${safeName}</div>
+                            <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+                                <input type="number" id="weight_${index}" placeholder="الوزن KG" style="flex: 1; min-width: 100px;" value="${escapeHtml(p.weight)}">
+                                <input type="number" id="height_${index}" placeholder="الطول CM" style="flex: 1; min-width: 100px;" value="${escapeHtml(p.height)}">
+                            </div>
+                        </div>`;
+
+                    attendanceResults[p.row_index] = 'حاضر';
+                });
+
+                // رسم قسم التحضير بالترتيب الأبجدي (من الألف إلى الياء)
+                sortedForAtt.forEach(p => {
+                    const cat       = p.category || 'غير محدد';
+                    const safeName  = escapeHtml(p.name);   // 🛡️ XSS-safe
+                    const safeCat   = escapeHtml(cat);
+                    const chipClass = getCategoryChipClass(cat);
+                    const categoryChip = `<span class="category-chip ${chipClass}">👶 ${safeCat}</span>`;
+
+                    attContainer.innerHTML += `
+                        <div class="glass-card attendance-item" data-category="${safeCat}">
+                            <div>
+                                ${categoryChip}
+                                <div style="font-weight: bold; font-size: 16px;">${safeName}</div>
+                            </div>
+                            <div class="attendance-actions">
+                                <button class="btn toggle-btn present active"
+                                    data-row="${p.row_index}"
+                                    onclick="setStatus(${p.row_index}, 'حاضر', this)">حاضر</button>
+                                <button class="btn toggle-btn absent"
+                                    data-row="${p.row_index}"
+                                    onclick="setStatus(${p.row_index}, 'غائب', this)">غائب</button>
+                            </div>
+                        </div>`;
+                });
+
+                // رسم قسم الاشتراكات بالترتيب المُرتَّب (الأكثر تبقياً أولاً)
+                sortedForSubs.forEach(p => {
+                    const cat       = p.category || 'غير محدد';
+                    const safeName  = escapeHtml(p.name);
+                    const safeCat   = escapeHtml(cat);
+                    const safeJoin  = escapeHtml(p.join_date || '---');
+                    const chipClass = getCategoryChipClass(cat);
+                    const categoryChip = `<span class="category-chip ${chipClass}">👶 ${safeCat}</span>`;
+
+                    let subStatus = "غير محدد"; let subColor = "#9ca3af"; let progressWidth = 0;
+                    let daysInfo  = "تاريخ الانضمام غير مسجل";
+                    let alertBadge = "";
+
+                    if (p.join_date) {
+                        progressWidth = Math.max(0, Math.min(100, (p.daysLeft / 30) * 100));
+                        if (p.daysLeft > 7) {
+                            subStatus = "ساري"; subColor = "#059669";
+                        } else if (p.daysLeft > 0) {
+                            subStatus = "قارب على الانتهاء"; subColor = "#d4af37";
+                            alertBadge = `<div class="auto-alert-badge">🤖 تم التنبيه تلقائياً عبر النظام</div>`;
+                        } else {
+                            subStatus = "منتهي"; subColor = "#dc2626"; progressWidth = 100;
+                            alertBadge = `<div class="auto-alert-badge" style="color:#ef4444;">🤖 تم إرسال تنبيه الانتهاء تلقائياً</div>`;
+                        }
+                        daysInfo = `متبقي: ${Math.max(0, p.daysLeft)} يوم | مضى: ${p.daysElapsed} يوم`;
+                    }
+
+                    subContainer.innerHTML += `
+                        <div class="glass-card" data-category="${safeCat}" style="border-bottom: 4px solid ${subColor};" id="sub-card-${p.row_index}">
+                            ${categoryChip}
+                            <div style="font-weight: bold; font-size: 18px; margin-bottom: 5px;">${safeName}</div>
+                            <div style="font-size: 14px; color: var(--text-muted); margin-bottom: 10px;">بداية الاشتراك: ${safeJoin}</div>
+                            <div style="display: flex; justify-content: space-between; font-weight: bold; color: ${subColor};">
+                                <span id="sub-status-${p.row_index}">${subStatus}</span>
+                                <span style="font-size: 14px;" id="sub-days-${p.row_index}">${daysInfo}</span>
+                            </div>
+                            <div class="sub-progress-bar"><div class="sub-progress-fill" id="sub-bar-${p.row_index}" style="width: ${progressWidth}%; background-color: ${subColor};"></div></div>
+                            ${alertBadge}
+                            <button class="btn-renew" id="renew-btn-${p.row_index}"
+                                data-row="${p.row_index}" data-name="${safeName}"
+                                onclick="renewSubscription(this.dataset.row, this.dataset.name, this)">
+                                🔄 تجديد الاشتراك
+                            </button>
+                        </div>`;
+                });
+
+                // إعادة تطبيق الفلاتر النشطة
+                ['sub', 'meas', 'att'].forEach(section => {
+                    if (activeFilters[section] !== 'الكل') {
+                        const barId = { sub: 'subFilterBar', meas: 'measFilterBar', att: 'attFilterBar' }[section];
+                        const activeBtn = document.querySelector(`#${barId} .filter-btn.active`);
+                        if (activeBtn) applyFilter(section, activeFilters[section], activeBtn);
+                    }
+                });
+            })
+            .catch(() => {
+                document.getElementById('subscriptionsContainer').innerHTML = '<div style="color:#ef4444;">⚠️ تعذّر تحميل بيانات اللاعبين</div>';
+            });
+        }
+
+        function setStatus(rowIndex, status, element) {
+            // ✅ إصلاح B8: المفتاح row_index (فريد دائماً) بدل الاسم (قد يتكرر)
+            attendanceResults[rowIndex] = status;
+            const parent = element.parentElement;
+            parent.querySelector('.present').classList.remove('active');
+            parent.querySelector('.absent').classList.remove('active');
+            element.classList.add('active');
+        }
+
+        window.saveAllData = function() {
+            const sessionDate = document.getElementById('sessionDate').value;
+            if (!sessionDate) {
+                alert('⚠️ يرجى تحديد تاريخ الحصة أولاً من قسم التنبيهات');
+                return;
+            }
+            // 🛡️ Idempotency
+            const saveBtn = document.querySelector('.btn-save-main');
+            if (saveBtn) { saveBtn.disabled = true; saveBtn.textContent = '⏳ جارٍ الحفظ...'; }
+
+            const payload = {
+                date: sessionDate,
+                announcement: document.getElementById('announcements').value,
+                players: playersData.map((p, index) => ({
+                    row_index: p.row_index,
+                    name: p.name,
+                    weight: document.getElementById(`weight_${index}`) ? document.getElementById(`weight_${index}`).value : '',
+                    height: document.getElementById(`height_${index}`) ? document.getElementById(`height_${index}`).value : '',
+                    status: attendanceResults[p.row_index] || 'غائب'
+                }))
+            };
+            fetch('/save_dashboard', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload)
+            })
+            .then(res => res.json())
+            .then(data => alert(data.success ? '🎉 ' + data.message : '⚠️ ' + data.message))
+            .catch(() => alert('⚠️ حدث خطأ في الاتصال بالسيرفر!'))
+            .finally(() => {
+                if (saveBtn) { saveBtn.disabled = false; saveBtn.textContent = 'حفظ جميع البيانات الميدانية 📝'; }
+            });
+        };
+        // ===== تجديد الاشتراك =====
+        window.renewSubscription = function(rowIndex, playerName, btnEl) {
+            if (!confirm(`هل أنت متأكد من تجديد اشتراك "${playerName}" لمدة 30 يوماً؟`)) return;
+
+            // 🛡️ Idempotency: نمنع النقر المزدوج بقفل الزر
+            btnEl.disabled = true;
+            btnEl.classList.add('loading');
+            btnEl.textContent = '⏳ جارٍ التجديد...';
+
+            fetch('/renew_subscription', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ row_index: rowIndex, name: playerName })
+            })
+            .then(res => res.json())
+            .then(data => {
+                if (data.success) {
+                    btnEl.classList.remove('loading');
+                    btnEl.classList.add('renewed');
+                    btnEl.textContent = '✅ تم التجديد';
+                    // يبقى disabled = true (لا يحتاج فك)
+
+                    const card = document.getElementById(`sub-card-${rowIndex}`);
+                    if (card) {
+                        card.style.borderBottomColor = '#059669';
+                        const statusEl = document.getElementById(`sub-status-${rowIndex}`);
+                        const daysEl   = document.getElementById(`sub-days-${rowIndex}`);
+                        const barEl    = document.getElementById(`sub-bar-${rowIndex}`);
+                        if (statusEl) { statusEl.textContent = 'ساري'; statusEl.style.color = '#059669'; }
+                        if (daysEl)   { daysEl.textContent   = 'متبقي: 30 يوم | مضى: 0 يوم'; daysEl.style.color = '#059669'; }
+                        if (barEl)    { barEl.style.width = '100%'; barEl.style.backgroundColor = '#059669'; }
+                    }
+                } else {
+                    btnEl.disabled = false;
+                    btnEl.classList.remove('loading');
+                    btnEl.textContent = '🔄 تجديد الاشتراك';
+                    alert('⚠️ ' + data.message);
+                    // 🛡️ State reconciliation: نُعيد جلب الحقيقة من السيرفر
+                    loadDashboardData();
+                }
+            })
+            .catch(() => {
+                btnEl.disabled = false;
+                btnEl.classList.remove('loading');
+                btnEl.textContent = '🔄 تجديد الاشتراك';
+                alert('⚠️ حدث خطأ في الاتصال — جارٍ مزامنة البيانات مع السيرفر');
+                // 🛡️ State reconciliation: قد يكون السيرفر نجح والشبكة فشلت بعد ذلك
+                // نُعيد التحميل لمعرفة الحالة الحقيقية بدل ترك الواجهة بحالة وهمية
+                loadDashboardData();
+            });
+        };
+    </script>
+</body>
+</html>
