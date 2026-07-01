@@ -60,7 +60,16 @@ attendance_sheet = None
 
 # الاتصال بجوجل شيت
 try:
-    gc = gspread.service_account(filename=GOOGLE_CREDENTIALS_PATH)
+    import json as _json
+    _creds_json = os.environ.get('GOOGLE_CREDENTIALS_JSON')
+    if _creds_json:
+        _creds_dict = _json.loads(_creds_json)
+        from google.oauth2.service_account import Credentials as _Creds
+        _scopes = ['https://spreadsheets.google.com/feeds', 'https://www.googleapis.com/auth/drive']
+        _creds = _Creds.from_service_account_info(_creds_dict, scopes=_scopes)
+        gc = gspread.authorize(_creds)
+    else:
+        gc = gspread.service_account(filename=GOOGLE_CREDENTIALS_PATH)
     spreadsheet = gc.open(SPREADSHEET_NAME)
     sheet = spreadsheet.sheet1
     try:
