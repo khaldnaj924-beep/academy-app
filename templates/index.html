@@ -317,6 +317,119 @@
     .chart-area{height:210px}
     .bar-day{font-size:10px}
   }
+
+  /* ============================================================
+     MOBILE PREMIUM REFINEMENT — phones only (< 768px)
+     Isolated block. Desktop (1024px+) and tablet (768–1023px)
+     are untouched: none of these rules apply at ≥768px.
+     8px spacing system · reduced glow · tighter hierarchy.
+     ============================================================ */
+  @media (max-width:767px){
+    /* Soften every var-driven glow by ~60% (mobile only) */
+    :root{
+      --glow:0 0 6px rgba(242,202,80,.20);
+      --gold-line:rgba(242,202,80,.18);
+    }
+
+    /* softer ambient background so content leads the eye */
+    body::before{opacity:.12}
+
+    .wrap{padding:0 16px}
+
+    /* ---------- HEADER: compact, brand-first ---------- */
+    .topbar-inner{gap:12px;padding:10px 0}
+    .brand{gap:10px}
+    .crest{width:40px;height:40px;border-radius:11px;
+      box-shadow:inset 0 0 12px rgba(242,202,80,.10)}
+    .crest svg{width:23px;height:23px}
+    .brand-text .ar{font-size:16px;line-height:1.15;
+      text-shadow:0 0 8px rgba(242,202,80,.18)}          /* primary focus */
+    .brand-text .loc{font-size:10px;opacity:.6;margin-top:3px;gap:4px}
+    .brand-text .loc svg{width:10px;height:10px}
+
+    /* CTA stays prominent — keeps its soft glow (primary action) */
+    .cta{padding:10px 15px;font-size:13.5px;border-radius:12px;gap:7px;
+      box-shadow:0 4px 16px rgba(242,202,80,.22), inset 0 1px 0 rgba(255,255,255,.28)}
+    .cta:active{transform:scale(.97)}
+    .cta svg{width:16px;height:16px}
+    .actions{gap:8px}
+
+    /* ---------- NAVIGATION: 44px targets, elegant active ---------- */
+    .nav-links{gap:6px;padding-top:10px;margin-top:2px}
+    .nav-links a{font-size:13.5px;font-weight:700;padding:0 15px;border-radius:11px;
+      min-height:44px;display:inline-flex;align-items:center;
+      letter-spacing:-.005em;transition:color .18s, background .18s, box-shadow .18s, transform .12s}
+    .nav-links a:hover{text-shadow:none;box-shadow:inset 0 0 0 1px var(--gold-line)}
+    .nav-links a.active{box-shadow:0 2px 10px rgba(242,202,80,.28)} /* elegant, not blazing */
+    .nav-links a:active{transform:scale(.96)}
+
+    /* ---------- HERO: reclaim vertical space ---------- */
+    .hero{padding:16px 0 2px}
+    .hero h1{font-size:19px;line-height:1.25}
+    .hero h1 .accent{text-shadow:0 0 10px rgba(242,202,80,.22)}
+
+    /* ---------- GRID: tighter, denser ---------- */
+    .grid{grid-template-columns:1fr;gap:12px;margin:14px 0 24px}
+    .grid-col{gap:12px}
+
+    /* ---------- STAT CARDS: ~38% shorter, bigger numbers ---------- */
+    .stat-card{padding:14px 15px;border-radius:14px;
+      animation:mFade .45s ease both}
+    .stat-card::before,.stat-card.warn::before{opacity:.6}
+    .sc-icon{width:36px;height:36px;border-radius:10px;box-shadow:none;
+      background:var(--gold-soft)}
+    .stat-card.warn .sc-icon{box-shadow:none}
+    .sc-icon svg{width:20px;height:20px}
+    .sc-label{margin-top:10px;font-size:12.5px;font-weight:700;color:var(--muted)}
+    .sc-value{margin-top:2px;font-size:34px;letter-spacing:-.03em} /* number = focal point */
+    .sc-trend{margin-top:6px;font-size:12px}
+
+    /* ---------- PANELS: tighter padding, subtle depth ---------- */
+    .panel{padding:16px;border-radius:16px;animation:mFade .45s ease both}
+    .panel-title{font-size:14.5px;margin-bottom:2px}
+
+    /* ---------- DONUT: compact ---------- */
+    .donut-stack{width:150px;height:150px;margin-top:4px}
+    .donut{box-shadow:0 0 12px rgba(242,202,80,.14)}
+    .donut-hole{inset:28px}
+    .donut-hole .v{font-size:32px}
+    .donut-hole .l{font-size:10.5px}
+    .legend{margin-top:14px;gap:9px}
+    .leg-row{font-size:12.5px}
+
+    /* ---------- CHART: shorter, calmer bars ---------- */
+    .chart-top{margin-bottom:12px;gap:10px}
+    .big-val{font-size:34px}
+    .big-val small{font-size:11px;margin-top:4px}
+    .chart-area{height:170px;
+      background:repeating-linear-gradient(0deg, transparent 0 41px, rgba(242,202,80,.05) 41px 42px)}
+    .bar-gold{box-shadow:0 0 6px rgba(242,202,80,.20)}
+    .bar-col.today .bar-gold{box-shadow:0 0 10px rgba(242,202,80,.40);outline:1px solid rgba(255,255,255,.18)}
+    .bars{gap:8px}
+
+    /* ---------- CHIPS / TOGGLES: 8px rhythm + tap feedback ---------- */
+    .att-chip,.target-chip{padding:9px 16px;font-size:13px;transition:all .2s, transform .12s}
+    .att-chip.active,.target-chip.active{box-shadow:0 0 8px rgba(242,202,80,.12)}
+    .att-chip:active,.target-chip:active{transform:scale(.96)}
+    .att-filter,.target-group{gap:8px}
+    .att-row{padding:11px 13px}
+    .att-row .a-name{font-size:14px}
+    .att-toggle{padding:9px 14px;min-height:40px;transition:.18s, transform .12s}
+    .att-toggle:active{transform:scale(.95)}
+
+    /* ---------- ALERTS: primary send keeps its glow ---------- */
+    .alert-box{margin-top:16px}
+    .alert-send:active{transform:scale(.97)}
+
+    /* ---------- Subtle mobile entrance animation ---------- */
+    @keyframes mFade{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+    .grid > *:nth-child(2){animation-delay:.05s}
+    .grid > *:nth-child(3){animation-delay:.10s}
+    .grid > *:nth-child(4){animation-delay:.15s}
+    @media (prefers-reduced-motion:reduce){
+      .stat-card,.panel,.grid > *{animation:none}
+    }
+  }
 </style>
 </head>
 <body>
