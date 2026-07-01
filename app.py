@@ -167,7 +167,7 @@ def view_dashboard():
                         today_attendance += 1
                         
         # تمرير الأرقام الحقيقية المحسوبة إلى ملف الـ HTML
-        return render_template('dashboard.html', 
+        return render_template('index.html',
                                active_players=active_players, 
                                today_attendance=today_attendance, 
                                new_requests=new_requests, 
