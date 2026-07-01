@@ -1,0 +1,98 @@
+# ============================================================
+#  الأسرار والملفات الحساسة (الأهم — لا تُرفع أبداً)
+# ============================================================
+key.json
+credentials.json
+service-account*.json
+google-credentials*.json
+*-credentials.json
+client_secret*.json
+
+# متغيرات البيئة
+.env
+.env.*
+!.env.example
+*.env
+
+# مفاتيح وتوكنات
+*.key
+*.pem
+*.pfx
+secrets/
+tokens/
+
+# جلسات الواتساب
+.wwebjs_auth/
+.wwebjs_cache/
+whatsapp-session/
+
+# ============================================================
+#  بايثون
+# ============================================================
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+
+# البيئات الافتراضية
+venv/
+env/
+.venv/
+ENV/
+env.bak/
+venv.bak/
+
+# أدوات البناء والتوزيع
+build/
+dist/
+*.egg-info/
+.eggs/
+*.egg
+develop-eggs/
+wheels/
+pip-wheel-metadata/
+
+# أدوات الاختبار والتغطية
+.pytest_cache/
+.tox/
+.coverage
+.coverage.*
+htmlcov/
+.cache/
+
+# Jupyter / IPython
+.ipynb_checkpoints/
+
+# أدوات الفحص
+.mypy_cache/
+.ruff_cache/
+.dmypy.json
+
+# ============================================================
+#  قواعد البيانات المحلية والسجلات
+# ============================================================
+*.sqlite
+*.sqlite3
+*.db
+db_backups/
+instance/
+
+logs/
+*.log
+
+# ============================================================
+#  ملفات النظام والمحررات
+# ============================================================
+.DS_Store
+Thumbs.db
+desktop.ini
+.vscode/
+.idea/
+*.swp
+*~
+
+# ملفات مؤقتة
+tmp/
+*.tmp
+.env
+key.json

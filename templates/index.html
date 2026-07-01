@@ -1,0 +1,773 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>أكاديمية ربوع العين — لوحة الإدارة الحية</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800;900&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#131313;
+    --bg-2:#0c0c0c;
+    --panel:#161616;
+    --black-card:#0f0f0f;
+    --gold:#F2CA50;
+    --gold-2:#d9ad3a;
+    --gold-soft:rgba(242,202,80,.10);
+    --gold-line:rgba(242,202,80,.22);
+    --gold-line-strong:rgba(242,202,80,.45);
+    --red:#e3735e;
+    --red-line:rgba(227,115,94,.40);
+    --green:#5fcf80;
+    --fg:#ffffff;
+    --muted:#9b988d;
+    --muted-2:#6f6c63;
+    --font:'Tajawal', -apple-system, 'Segoe UI', system-ui, sans-serif;
+    --glow:0 0 16px rgba(242,202,80,.45);
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html,body{background:var(--bg);color:var(--fg);font-family:var(--font);-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale}
+  body{min-height:100vh;background:
+      radial-gradient(1000px 540px at 50% -12%, rgba(242,202,80,.07), transparent 60%),
+      radial-gradient(720px 480px at 4% 116%, rgba(242,202,80,.04), transparent 60%),
+      var(--bg);}
+  /* Layered natural background — subtle foliage/pitch view fading out from the centre,
+     sitting behind every UI element (header + the four glass boxes). */
+  body::before{content:"";position:fixed;inset:0;z-index:-1;pointer-events:none;
+    background:url('mqmclf9g-2e57a8904eca15dfa7eb3619b4009b45.jpg') center 60% / cover no-repeat;
+    opacity:.18;filter:saturate(1.15) brightness(.78) contrast(1.02);
+    -webkit-mask:radial-gradient(125% 95% at 50% 42%, #000 0%, rgba(0,0,0,.55) 46%, transparent 80%);
+            mask:radial-gradient(125% 95% at 50% 42%, #000 0%, rgba(0,0,0,.55) 46%, transparent 80%);}
+  ::selection{background:var(--gold);color:#131313}
+  a{color:inherit;text-decoration:none}
+  button{font-family:inherit;cursor:pointer}
+  .wrap{max-width:1400px;margin:0 auto;padding:0 30px}
+
+  /* ============ HEADER ============ */
+  header.topbar{
+    border-bottom:1px solid var(--gold-line);
+    background:linear-gradient(180deg, rgba(242,202,80,.05), rgba(12,12,12,.30) 78%), rgba(12,12,12,.55);
+    position:sticky;top:0;z-index:40;backdrop-filter:blur(12px) saturate(1.1);
+    -webkit-backdrop-filter:blur(12px) saturate(1.1);
+  }
+  .topbar-inner{display:flex;align-items:center;justify-content:space-between;gap:28px;padding:15px 0}
+
+  /* brand — right */
+  .brand{display:flex;align-items:center;gap:14px}
+  .crest{
+    width:56px;height:56px;border-radius:14px;flex:none;display:grid;place-items:center;
+    background:radial-gradient(circle at 30% 25%, rgba(242,202,80,.28), transparent 62%), var(--panel);
+    border:1px solid var(--gold-line-strong);box-shadow:inset 0 0 22px rgba(242,202,80,.14), var(--glow);
+  }
+  .crest svg{width:32px;height:32px;color:var(--gold)}
+  .brand-text .ar{font-size:20px;font-weight:900;letter-spacing:-.01em;line-height:1.1;
+    color:var(--gold);text-shadow:0 0 18px rgba(242,202,80,.35)}
+  .brand-text .loc{display:flex;align-items:center;gap:6px;font-size:12px;color:#fff;opacity:.82;margin-top:6px}
+  .brand-text .loc svg{width:12px;height:12px;color:var(--gold)}
+
+  /* nav — center */
+  .nav-links{display:flex;align-items:center;gap:4px}
+  .nav-links a{
+    color:var(--gold);font-weight:700;font-size:15px;padding:9px 18px;border-radius:10px;
+    transition:color .18s, background .18s, text-shadow .18s, box-shadow .18s;
+  }
+  .nav-links a:hover{color:#fff;background:rgba(242,202,80,.08);
+    text-shadow:0 0 16px rgba(242,202,80,.85);box-shadow:inset 0 0 0 1px var(--gold-line)}
+  .nav-links a.active{color:#131313;background:var(--gold);text-shadow:none;box-shadow:var(--glow)}
+
+  /* actions — left */
+  /* LTR axis so the CTA sits at the far-left edge, then user + bell to its right */
+  .actions{direction:ltr;display:flex;align-items:center;gap:12px}
+  .cta{
+    display:inline-flex;align-items:center;gap:9px;
+    background:linear-gradient(180deg,#cf9f2e,#a8781b);
+    color:#fff;font-weight:800;font-size:15px;padding:13px 22px;border:1px solid rgba(242,202,80,.6);
+    border-radius:14px;white-space:nowrap;
+    box-shadow:0 6px 22px rgba(242,202,80,.22), inset 0 1px 0 rgba(255,255,255,.28);
+    transition:transform .12s ease, box-shadow .12s ease;
+  }
+  .cta:hover{transform:translateY(-2px);box-shadow:0 12px 30px rgba(242,202,80,.34), inset 0 1px 0 rgba(255,255,255,.4)}
+  .cta:active{transform:translateY(0)}
+  .cta svg{width:18px;height:18px}
+  .ico-btn{
+    position:relative;width:44px;height:44px;border-radius:12px;flex:none;display:grid;place-items:center;
+    background:var(--panel);border:1px solid var(--gold-line);color:var(--gold);transition:.16s;
+  }
+  .ico-btn:hover{border-color:var(--gold-line-strong);box-shadow:var(--glow)}
+  .ico-btn svg{width:20px;height:20px}
+  .ico-btn .dot{position:absolute;top:9px;left:11px;width:7px;height:7px;border-radius:50%;
+    background:var(--red);box-shadow:0 0 8px var(--red);border:1.5px solid var(--panel)}
+
+  /* ============ HERO ============ */
+  .hero{padding:28px 0 4px}
+  .hero h1{font-size:30px;font-weight:900;letter-spacing:-.01em;color:#fff;line-height:1.15}
+  .hero h1 .accent{color:var(--gold);text-shadow:0 0 20px rgba(242,202,80,.4)}
+
+  /* ============ CONTENT GRID — 2×2 ============ */
+  /* RTL row-major: top-right · top-left / bottom-right · bottom-left */
+  .grid{display:grid;grid-template-columns:1fr 1fr;gap:18px;margin:22px 0 54px;align-items:stretch}
+  .grid-col{display:flex;flex-direction:column;gap:18px}
+  /* glass panels — foliage shows through */
+  .panel{background:linear-gradient(180deg, rgba(24,24,22,.60), rgba(13,13,13,.52));
+    border:1px solid var(--gold-line);border-radius:18px;padding:22px;
+    backdrop-filter:blur(8px) saturate(1.1);-webkit-backdrop-filter:blur(8px) saturate(1.1)}
+  .panel-title{display:flex;align-items:center;gap:10px;font-size:16px;font-weight:800;color:#fff;margin-bottom:4px}
+  .panel-title .tdot{width:7px;height:7px;border-radius:50%;background:var(--gold);box-shadow:var(--glow)}
+
+  /* stat cards — glass over foliage */
+  .stat-card{position:relative;background:rgba(15,15,14,.52);border:1px solid var(--gold-line);
+    border-radius:16px;padding:22px;overflow:hidden;
+    backdrop-filter:blur(8px) saturate(1.1);-webkit-backdrop-filter:blur(8px) saturate(1.1)}
+  .stat-card.warn{border-color:var(--red-line)}
+  .stat-card::before{content:"";position:absolute;inset:0;
+    background:radial-gradient(360px 140px at 100% 0%, rgba(242,202,80,.10), transparent 70%);pointer-events:none}
+  .stat-card.warn::before{background:radial-gradient(360px 140px at 100% 0%, rgba(227,115,94,.12), transparent 70%)}
+  .sc-icon{width:50px;height:50px;border-radius:13px;display:grid;place-items:center;
+    background:var(--gold-soft);border:1px solid var(--gold-line);color:var(--gold);box-shadow:var(--glow);position:relative}
+  .stat-card.warn .sc-icon{background:rgba(227,115,94,.10);border-color:var(--red-line);color:var(--red);box-shadow:0 0 16px rgba(227,115,94,.4)}
+  .sc-icon svg{width:26px;height:26px}
+  .sc-label{margin-top:18px;font-size:14.5px;font-weight:700;color:#fff;position:relative}
+  .sc-value{margin-top:8px;font-size:48px;font-weight:900;line-height:1;color:#fff;
+    letter-spacing:-.02em;font-variant-numeric:tabular-nums;position:relative}
+  .sc-trend{margin-top:12px;display:inline-flex;align-items:center;gap:6px;font-size:13px;font-weight:700;position:relative}
+  .sc-trend.up{color:var(--green)}
+  .sc-trend.up svg{width:14px;height:14px}
+  .sc-trend.safe{color:var(--green)}
+
+  /* bottom-left — attendance bar chart (glass, foliage shows through) */
+  .chart-panel{position:relative;overflow:hidden;border-color:var(--gold-line-strong)}
+  .chart-panel > *{position:relative;z-index:1}
+  .chart-panel .bar-day{text-shadow:0 1px 4px rgba(0,0,0,.7)}
+  .chart-top{display:flex;align-items:flex-start;justify-content:space-between;gap:16px;margin-bottom:18px}
+  .big-val{font-size:46px;font-weight:900;color:#fff;line-height:1;letter-spacing:-.02em;font-variant-numeric:tabular-nums}
+  .big-val small{display:block;font-size:12.5px;font-weight:700;color:var(--muted);margin-top:6px}
+  .legend-mini{display:flex;align-items:center;gap:16px;font-size:12px;color:var(--muted);font-weight:600}
+  .legend-mini span{display:inline-flex;align-items:center;gap:7px}
+  .legend-mini i{width:11px;height:11px;border-radius:3px;display:inline-block}
+  .lg-gold{background:linear-gradient(180deg,#F2CA50,#b88f2a);box-shadow:0 0 8px rgba(242,202,80,.5)}
+  .lg-grey{background:rgba(255,255,255,.16)}
+  .chart-area{position:relative;height:250px;padding:14px 4px 0;
+    background:
+      repeating-linear-gradient(0deg, transparent 0 49px, rgba(242,202,80,.06) 49px 50px);
+    border-radius:10px}
+  .bars{display:flex;align-items:flex-end;justify-content:space-between;gap:12px;height:100%;position:relative;z-index:1}
+  .bar-col{flex:1;display:flex;flex-direction:column;align-items:center;height:100%}
+  .bar-wrap{position:relative;width:100%;max-width:40px;flex:1;display:flex;align-items:flex-end;justify-content:center}
+  .bar-grey{position:absolute;bottom:0;width:100%;background:rgba(255,255,255,.12);border-radius:6px 6px 0 0}
+  .bar-gold{position:relative;width:58%;background:linear-gradient(180deg,#F6D268,#b88f2a);
+    border-radius:6px 6px 0 0;box-shadow:0 0 14px rgba(242,202,80,.35);transition:filter .2s}
+  .bar-col.today .bar-gold{box-shadow:0 0 22px rgba(242,202,80,.75);outline:1px solid rgba(255,255,255,.25)}
+  .bar-col:hover .bar-gold{filter:brightness(1.12)}
+  .bar-day{margin-top:10px;font-size:11.5px;font-weight:700;color:var(--muted)}
+  .bar-col.today .bar-day{color:var(--gold)}
+
+  /* right column — donut */
+  .donut-wrap{display:flex;flex-direction:column;align-items:center;margin-top:6px}
+  .donut-stack{position:relative;width:190px;height:190px;margin:8px auto 0}
+  .donut{position:absolute;inset:0;border-radius:50%;
+    background:conic-gradient(
+      #F2CA50 0 32%,
+      #d9ad3a 32% 56%,
+      #bd942d 56% 76%,
+      #977321 76% 90%,
+      #6e561a 90% 100%);
+    box-shadow:0 0 26px rgba(242,202,80,.25)}
+  .donut-hole{position:absolute;inset:34px;border-radius:50%;background:rgba(15,15,14,.66);
+    border:1px solid var(--gold-line);box-shadow:inset 0 0 0 6px var(--bg-2);
+    display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center}
+  .donut-hole .v{font-size:40px;font-weight:900;color:#fff;line-height:1;letter-spacing:-.02em;font-variant-numeric:tabular-nums}
+  .donut-hole .l{font-size:11.5px;font-weight:700;color:var(--muted);margin-top:5px}
+  .legend{width:100%;margin-top:20px;display:flex;flex-direction:column;gap:11px}
+  .leg-row{display:flex;align-items:center;gap:10px;font-size:13.5px}
+  .leg-row .ld{width:11px;height:11px;border-radius:3px;flex:none}
+  .leg-row .ln{color:#fff;font-weight:600;flex:1}
+  .leg-row .lp{color:#fff;font-weight:800;font-variant-numeric:tabular-nums}
+
+  /* ===== Alerts / التنبيهات ===== */
+  .alert-box{max-width:760px;margin:22px auto 0}
+  .alert-field-label{font-size:13px;font-weight:800;color:var(--gold);margin:4px 0 11px;display:block}
+  .target-group{display:flex;flex-wrap:wrap;gap:9px;margin-bottom:20px}
+  .target-chip{padding:9px 20px;border-radius:22px;border:1.5px solid var(--gold-line);
+    background:rgba(255,255,255,.04);color:var(--muted);font-family:inherit;font-size:14px;font-weight:700;
+    cursor:pointer;transition:all .2s;white-space:nowrap}
+  .target-chip:hover{border-color:var(--gold);color:var(--gold)}
+  .target-chip.active{background:var(--gold-soft);border-color:var(--gold);color:var(--gold);
+    box-shadow:0 0 12px rgba(242,202,80,.18)}
+  .a-target{display:inline-block;margin-inline-start:8px;font-size:11px;font-weight:800;
+    padding:2px 10px;border-radius:11px;background:var(--gold-soft);color:var(--gold);
+    border:1px solid var(--gold-line-strong);vertical-align:1px}
+  .alert-textarea{width:100%;min-height:150px;resize:vertical;background:var(--bg-2);
+    border:1px solid var(--gold-line);color:#fff;font-family:inherit;font-size:15px;line-height:1.7;
+    padding:16px 18px;border-radius:14px;outline:none;transition:.15s}
+  .alert-textarea::placeholder{color:var(--muted-2)}
+  .alert-textarea:focus{border-color:var(--gold);box-shadow:0 0 0 3px rgba(242,202,80,.12)}
+  .alert-send{display:inline-flex;align-items:center;gap:9px;margin-top:14px;
+    background:linear-gradient(180deg,#F2CA50,#b88f2a);color:#131313;font-weight:800;font-size:15px;
+    padding:13px 26px;border:1px solid rgba(242,202,80,.6);border-radius:14px;
+    box-shadow:0 6px 22px rgba(242,202,80,.25), inset 0 1px 0 rgba(255,255,255,.4);transition:transform .12s ease, box-shadow .12s ease}
+  .alert-send:hover{transform:translateY(-2px);box-shadow:0 12px 30px rgba(242,202,80,.4)}
+  .alert-send:active{transform:translateY(0)}
+  .alert-send svg{width:18px;height:18px}
+  .alert-log{margin-top:30px;display:flex;flex-direction:column;gap:12px}
+  .alert-log-title{font-size:14px;font-weight:800;color:var(--muted);margin-bottom:2px;
+    display:flex;align-items:center;gap:8px}
+  .alert-item{background:rgba(15,15,14,.55);border:1px solid var(--gold-line);border-radius:13px;
+    padding:14px 16px;border-inline-start:3px solid var(--gold)}
+  .alert-item .a-text{color:#fff;font-size:14.5px;line-height:1.7;white-space:pre-wrap;word-break:break-word}
+  .alert-item .a-date{display:block;margin-top:8px;font-size:12px;color:var(--muted-2);font-variant-numeric:tabular-nums}
+  .alert-empty{color:var(--muted-2);font-size:13.5px;text-align:center;padding:18px}
+
+  /* ===== Attendance filter / تصفية التحضير ===== */
+  .att-filter{display:flex;flex-wrap:wrap;gap:9px;margin:4px 0 22px}
+  .att-chip{padding:9px 20px;border-radius:22px;border:1.5px solid var(--gold-line);
+    background:rgba(255,255,255,.04);color:var(--muted);font-family:inherit;font-size:14px;font-weight:700;
+    cursor:pointer;transition:all .2s;white-space:nowrap}
+  .att-chip:hover{border-color:var(--gold);color:var(--gold)}
+  .att-chip.active{background:var(--gold-soft);border-color:var(--gold);color:var(--gold);
+    box-shadow:0 0 12px rgba(242,202,80,.18)}
+  .att-list{display:flex;flex-direction:column;gap:12px}
+  .att-row{display:flex;align-items:center;justify-content:space-between;gap:12px;
+    background:rgba(15,15,14,.55);border:1px solid var(--gold-line);border-radius:13px;padding:13px 16px}
+  .att-row .a-name{font-weight:800;color:#fff;font-size:15.5px;display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+  .att-cat{font-size:11px;font-weight:800;padding:3px 11px;border-radius:11px;
+    background:var(--gold-soft);color:var(--gold);border:1px solid var(--gold-line-strong)}
+  .att-toggles{display:flex;gap:8px;flex:none}
+  .att-toggle{padding:8px 16px;border-radius:10px;border:1px solid var(--gold-line);
+    background:rgba(255,255,255,.04);color:var(--muted);font-family:inherit;font-weight:700;font-size:13.5px;
+    cursor:pointer;transition:.18s}
+  .att-toggle.present.active{background:#059669;border-color:#059669;color:#fff}
+  .att-toggle.absent.active{background:#dc2626;border-color:#dc2626;color:#fff}
+  .att-empty{color:var(--muted-2);font-size:13.5px;text-align:center;padding:18px}
+
+  /* ===== Tabs — تبديل الأقسام (يُظهر قسماً واحداً فقط) ===== */
+  .tab-panel{display:none}
+  .tab-panel.active{display:block;animation:tabFade .35s ease}
+  @keyframes tabFade{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
+
+  /* ============ MODAL ============ */
+  .scrim{position:fixed;inset:0;background:rgba(8,8,8,.58);backdrop-filter:blur(5px);
+    display:none;align-items:center;justify-content:center;z-index:80;padding:24px}
+  .scrim.open{display:flex}
+  .modal{width:100%;max-width:520px;background:linear-gradient(180deg,var(--panel),var(--bg-2));
+    border:1px solid var(--gold-line-strong);border-radius:20px;padding:26px;
+    max-height:calc(100vh - 48px);overflow-y:auto;
+    box-shadow:0 30px 80px rgba(0,0,0,.6);animation:pop .2s ease}
+  @keyframes pop{from{opacity:0;transform:translateY(12px) scale(.98)}to{opacity:1;transform:none}}
+  .modal-head{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:20px}
+  .modal-head h3{font-size:20px;font-weight:800;color:#fff}
+  .modal-head p{font-size:13px;color:var(--muted-2);margin-top:4px}
+  .x{background:var(--panel);border:1px solid var(--gold-line);color:var(--muted);
+    width:36px;height:36px;border-radius:10px;display:grid;place-items:center;font-size:18px}
+  .x:hover{color:#fff;border-color:var(--gold-line-strong)}
+  .field{margin-bottom:14px}
+  .field label{display:block;font-size:13px;font-weight:700;color:var(--muted);margin-bottom:7px}
+  .field input,.field select{width:100%;background:var(--bg-2);border:1px solid var(--gold-line);
+    color:#fff;font-family:inherit;font-size:14.5px;padding:12px 14px;border-radius:10px;outline:none;transition:.15s}
+  .field input:focus,.field select:focus{border-color:var(--gold);box-shadow:0 0 0 3px rgba(242,202,80,.12)}
+  .field input::placeholder{color:var(--muted-2)}
+  .grid-2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+  /* open custom dropdown (سنة الميلاد) */
+  .od-select{position:relative;width:100%}
+  .od-control{display:flex;align-items:center;justify-content:space-between;gap:10px;width:100%;
+    background:var(--bg-2);border:1px solid var(--gold-line);color:#fff;font-size:15px;font-weight:700;
+    padding:13px 14px;border-radius:11px;cursor:pointer;transition:.15s;font-variant-numeric:tabular-nums}
+  .od-control:hover{border-color:var(--gold-line-strong)}
+  .od-select.open .od-control{border-color:var(--gold);box-shadow:0 0 0 3px rgba(242,202,80,.12)}
+  .od-control .chev{width:18px;height:18px;color:var(--gold);transition:transform .2s;filter:drop-shadow(0 0 6px rgba(242,202,80,.55))}
+  .od-select.open .od-control .chev{transform:rotate(180deg)}
+  .od-list{margin-top:8px;max-height:188px;overflow-y:auto;border:1px solid var(--gold-line);
+    border-radius:12px;background:rgba(8,8,8,.72);padding:6px;display:none}
+  .od-select.open .od-list{display:block}
+  .od-opt{padding:10px 12px;border-radius:8px;font-size:15px;font-weight:600;color:var(--muted);
+    cursor:pointer;font-variant-numeric:tabular-nums;transition:.12s}
+  .od-opt:hover{background:rgba(242,202,80,.08);color:#fff}
+  .od-opt.selected{background:var(--gold-soft);color:var(--gold);border:1px solid var(--gold-line-strong);
+    font-weight:800;box-shadow:0 0 12px rgba(242,202,80,.12)}
+  .od-list::-webkit-scrollbar{width:8px}
+  .od-list::-webkit-scrollbar-thumb{background:rgba(242,202,80,.3);border-radius:8px}
+  .od-list::-webkit-scrollbar-track{background:transparent}
+  .modal-foot{display:flex;gap:10px;margin-top:22px}
+  .modal-foot .cta{flex:1;justify-content:center}
+  .btn-ghost{flex:none;background:transparent;border:1px solid var(--gold-line);color:var(--muted);
+    font-weight:700;font-size:14px;padding:13px 20px;border-radius:14px}
+  .btn-ghost:hover{color:#fff;border-color:var(--gold-line-strong)}
+  .ok-msg{display:none;align-items:center;gap:10px;color:var(--green);font-weight:700;font-size:14px;
+    margin-top:14px;padding:12px 14px;background:rgba(95,207,128,.08);border:1px solid rgba(95,207,128,.25);border-radius:11px}
+  .ok-msg.show{display:flex}
+  .ok-msg svg{width:18px;height:18px;flex:none}
+
+  /* ============ RESPONSIVE ============ */
+  @media (max-width:920px){
+    .topbar-inner{flex-wrap:wrap;gap:14px}
+    .nav-links{order:3;width:100%;justify-content:center;flex-wrap:wrap;
+      border-top:1px solid var(--gold-line);padding-top:12px}
+  }
+  @media (max-width:760px){
+    .grid{grid-template-columns:1fr}
+  }
+  @media (max-width:620px){
+    .wrap{padding:0 16px}
+    .brand-text .ar{font-size:17px}
+    .hero h1{font-size:23px}
+    .cta{padding:11px 16px;font-size:14px}
+    .actions{flex:1;justify-content:flex-end}
+    .grid-2{grid-template-columns:1fr}
+    .chart-area{height:210px}
+    .bar-day{font-size:10px}
+  }
+</style>
+</head>
+<body>
+
+<!-- ============ HEADER ============ -->
+<header class="topbar">
+  <div class="wrap topbar-inner">
+
+    <!-- Brand — RIGHT (crowned golden lion crest + brand text) -->
+    <div class="brand">
+      <div class="crest" aria-hidden="true">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+          <!-- crown -->
+          <path d="M5 7.5 7.2 10 12 4.5 16.8 10 19 7.5l-1 6.5H6l-1-6.5Z"/>
+          <circle cx="5" cy="7" r=".9" fill="currentColor"/><circle cx="12" cy="4" r=".9" fill="currentColor"/><circle cx="19" cy="7" r=".9" fill="currentColor"/>
+          <!-- lion muzzle hint -->
+          <path d="M8.5 16.5c.9 1.4 2.1 2 3.5 2s2.6-.6 3.5-2"/>
+          <path d="M10.4 15.6h.01M13.6 15.6h.01"/>
+        </svg>
+      </div>
+      <div class="brand-text">
+        <div class="ar">أكاديمية ربوع العين</div>
+        <div class="loc">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"/><circle cx="12" cy="10" r="3"/></svg>
+          ربوع العين - المملكة العربية السعودية
+        </div>
+      </div>
+    </div>
+
+    <!-- Nav — CENTER -->
+    <nav class="nav-links" id="nav">
+      <a href="#" class="active" data-tab="home">الرئيسية</a>
+      <a href="#" data-tab="requests">الطلبات</a>
+      <a href="#" data-tab="subs">الاشتراكات</a>
+      <a href="#" data-tab="attend">التحضير</a>
+      <a href="#" data-tab="alerts">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:16px;height:16px;vertical-align:-3px;margin-inline-start:5px"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+        التنبيهات
+      </a>
+    </nav>
+
+    <!-- Actions — LEFT (button far-left, then user + notification icons) -->
+    <div class="actions">
+      <button class="cta" id="openRegister">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M19 8v6M22 11h-6"/></svg>
+        تسجيل لاعب جديد
+      </button>
+    </div>
+  </div>
+</header>
+
+<main class="wrap">
+
+  <!-- ===== TAB: الرئيسية ===== -->
+  <section id="tab-home" class="tab-panel active">
+
+  <!-- ============ HERO ============ -->
+  <section class="hero">
+    <h1>لوحة الإدارة الحية - <span class="accent">كابتن خالد</span></h1>
+  </section>
+
+  <!-- ============ CONTENT GRID ============ -->
+  <div class="grid grid-2x2">
+
+    <!-- TOP-RIGHT (RTL first) — cancelled subscriptions (red alert) -->
+    <div class="stat-card warn">
+      <div class="sc-icon">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3 2 20h20L12 3Z"/><path d="M12 10v4"/><path d="M12 17.5v.01"/></svg>
+      </div>
+      <div class="sc-label">الاشتراكات والاشتراكات الملغاة</div>
+      <div class="sc-value">0</div>
+    </div>
+
+    <!-- TOP-LEFT — new requests (gold) -->
+    <div class="stat-card">
+      <div class="sc-icon">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="m3 7 9 6 9-6"/></svg>
+      </div>
+      <div class="sc-label">طلبات الالتحاق الجديدة (الانتظار)</div>
+      <div class="sc-value">5</div>
+    </div>
+
+    <!-- BOTTOM-RIGHT — active players donut -->
+    <div class="panel donut-panel">
+      <div class="panel-title"><span class="tdot"></span> حالة اللاعبين النشطين</div>
+      <div class="donut-wrap">
+        <div class="donut-stack">
+          <div class="donut" role="img" aria-label="توزيع اللاعبين النشطين"></div>
+          <div class="donut-hole">
+            <div class="v">342</div>
+            <div class="l">إجمالي اللاعبين</div>
+          </div>
+        </div>
+
+        <div class="legend">
+          <div class="leg-row"><span class="ld" style="background:#F2CA50;box-shadow:0 0 8px rgba(242,202,80,.6)"></span><span class="ln">فريق الشباب</span><span class="lp">30%</span></div>
+          <div class="leg-row"><span class="ld" style="background:#d9ad3a"></span><span class="ln">تحت 15 سنة</span><span class="lp">20%</span></div>
+          <div class="leg-row"><span class="ld" style="background:#bd942d"></span><span class="ln">الفريق الأول</span><span class="lp">22%</span></div>
+          <div class="leg-row"><span class="ld" style="background:#977321"></span><span class="ln">تحت 17 سنة</span><span class="lp">18%</span></div>
+          <div class="leg-row"><span class="ld" style="background:#6e561a"></span><span class="ln">تحت 13 سنة</span><span class="lp">10%</span></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- BOTTOM-LEFT — live attendance bar chart -->
+    <div class="panel chart-panel">
+      <div class="chart-top">
+        <div>
+          <div class="panel-title"><span class="tdot"></span> تحضير اليوم المباشر</div>
+          <div class="big-val">128 <small>حاضر اليوم من أصل 147</small></div>
+        </div>
+        <div class="legend-mini">
+          <span><i class="lg-gold"></i> الحضور</span>
+          <span><i class="lg-grey"></i> السعة</span>
+        </div>
+      </div>
+      <div class="chart-area">
+        <div class="bars">
+          <div class="bar-col"><div class="bar-wrap"><div class="bar-grey" style="height:70%"></div><div class="bar-gold" style="height:64%"></div></div><div class="bar-day">الإثنين</div></div>
+          <div class="bar-col"><div class="bar-wrap"><div class="bar-grey" style="height:82%"></div><div class="bar-gold" style="height:76%"></div></div><div class="bar-day">الثلاثاء</div></div>
+          <div class="bar-col today"><div class="bar-wrap"><div class="bar-grey" style="height:90%"></div><div class="bar-gold" style="height:87%"></div></div><div class="bar-day">الأربعاء</div></div>
+          <div class="bar-col"><div class="bar-wrap"><div class="bar-grey" style="height:74%"></div><div class="bar-gold" style="height:70%"></div></div><div class="bar-day">الخميس</div></div>
+          <div class="bar-col"><div class="bar-wrap"><div class="bar-grey" style="height:46%"></div><div class="bar-gold" style="height:40%"></div></div><div class="bar-day">الجمعة</div></div>
+          <div class="bar-col"><div class="bar-wrap"><div class="bar-grey" style="height:95%"></div><div class="bar-gold" style="height:91%"></div></div><div class="bar-day">السبت</div></div>
+          <div class="bar-col"><div class="bar-wrap"><div class="bar-grey" style="height:62%"></div><div class="bar-gold" style="height:58%"></div></div><div class="bar-day">الأحد</div></div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+  </section>
+  <!-- ===== END TAB: الرئيسية ===== -->
+
+  <!-- ===== TAB: الطلبات (مخفي افتراضياً) ===== -->
+  <section id="tab-requests" class="tab-panel">
+    <section class="hero"><h1>طلبات الالتحاق <span class="accent">المعلقة</span></h1></section>
+    <div class="panel" style="margin-top:22px">
+      <div class="panel-title"><span class="tdot"></span> الطلبات الجديدة بانتظار المراجعة</div>
+      <p style="color:var(--muted);margin-top:12px">سيتم عرض طلبات التسجيل الجديدة هنا.</p>
+    </div>
+  </section>
+
+  <!-- ===== TAB: الاشتراكات (مخفي افتراضياً) ===== -->
+  <section id="tab-subs" class="tab-panel">
+    <section class="hero"><h1>حالة <span class="accent">الاشتراكات</span></h1></section>
+    <div class="panel" style="margin-top:22px">
+      <div class="panel-title"><span class="tdot"></span> الاشتراكات السارية والمنتهية</div>
+      <p style="color:var(--muted);margin-top:12px">سيتم عرض حالة اشتراكات اللاعبين هنا.</p>
+    </div>
+  </section>
+
+  <!-- ===== TAB: التحضير (مخفي افتراضياً) ===== -->
+  <section id="tab-attend" class="tab-panel">
+    <section class="hero"><h1>التحضير <span class="accent">الميداني</span></h1></section>
+    <div class="panel" style="margin-top:22px">
+      <div class="panel-title"><span class="tdot"></span> تسجيل حضور وغياب اللاعبين</div>
+
+      <!-- تصفية حسب الفئة العمرية -->
+      <div class="att-filter" id="attFilter" style="margin-top:18px" role="radiogroup" aria-label="تصفية حسب الفئة">
+        <button type="button" class="att-chip active" role="radio" aria-checked="true"  data-cat="الكل">🌐 الكل</button>
+        <button type="button" class="att-chip" role="radio" aria-checked="false" data-cat="البراعم">🔵 البراعم</button>
+        <button type="button" class="att-chip" role="radio" aria-checked="false" data-cat="الابتدائية">🟢 الابتدائية</button>
+        <button type="button" class="att-chip" role="radio" aria-checked="false" data-cat="المتوسطة">🟡 المتوسطة</button>
+        <button type="button" class="att-chip" role="radio" aria-checked="false" data-cat="الشباب">🟠 الشباب</button>
+      </div>
+
+      <!-- قائمة اللاعبين — صفوف تجريبية تُستبدل لاحقاً ببيانات الـ backend. data-category هو مفتاح التصفية -->
+      <div class="att-list" id="attList">
+        <div class="att-row" data-category="البراعم">
+          <div class="a-name">عبدالله الغامدي <span class="att-cat">البراعم</span></div>
+          <div class="att-toggles">
+            <button type="button" class="att-toggle present active">حاضر</button>
+            <button type="button" class="att-toggle absent">غائب</button>
+          </div>
+        </div>
+        <div class="att-row" data-category="الابتدائية">
+          <div class="a-name">سعد القحطاني <span class="att-cat">الابتدائية</span></div>
+          <div class="att-toggles">
+            <button type="button" class="att-toggle present active">حاضر</button>
+            <button type="button" class="att-toggle absent">غائب</button>
+          </div>
+        </div>
+        <div class="att-row" data-category="المتوسطة">
+          <div class="a-name">فهد الشهري <span class="att-cat">المتوسطة</span></div>
+          <div class="att-toggles">
+            <button type="button" class="att-toggle present active">حاضر</button>
+            <button type="button" class="att-toggle absent">غائب</button>
+          </div>
+        </div>
+        <div class="att-row" data-category="الشباب">
+          <div class="a-name">ناصر العتيبي <span class="att-cat">الشباب</span></div>
+          <div class="att-toggles">
+            <button type="button" class="att-toggle present active">حاضر</button>
+            <button type="button" class="att-toggle absent">غائب</button>
+          </div>
+        </div>
+        <div class="att-row" data-category="البراعم">
+          <div class="a-name">يوسف الدوسري <span class="att-cat">البراعم</span></div>
+          <div class="att-toggles">
+            <button type="button" class="att-toggle present active">حاضر</button>
+            <button type="button" class="att-toggle absent">غائب</button>
+          </div>
+        </div>
+        <div class="att-row" data-category="المتوسطة">
+          <div class="a-name">تركي الحربي <span class="att-cat">المتوسطة</span></div>
+          <div class="att-toggles">
+            <button type="button" class="att-toggle present active">حاضر</button>
+            <button type="button" class="att-toggle absent">غائب</button>
+          </div>
+        </div>
+      </div>
+      <div class="att-empty" id="attEmpty" style="display:none">لا يوجد لاعبون في هذه الفئة.</div>
+    </div>
+  </section>
+
+  <!-- ===== TAB: التنبيهات (مخفي افتراضياً) ===== -->
+  <section id="tab-alerts" class="tab-panel">
+    <section class="hero">
+      <h1>
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:26px;height:26px;vertical-align:-4px;color:var(--gold)"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+        تنبيهات <span class="accent">الأهالي</span>
+      </h1>
+    </section>
+
+    <div class="alert-box">
+      <div class="panel">
+        <div class="panel-title"><span class="tdot"></span> كتابة تنبيه / إعلان جديد</div>
+
+        <span class="alert-field-label">الفئة المستهدفة</span>
+        <div class="target-group" id="targetGroup" role="radiogroup" aria-label="الفئة المستهدفة">
+          <button type="button" class="target-chip active" role="radio" aria-checked="true"  data-target="الكل">🌐 الكل</button>
+          <button type="button" class="target-chip" role="radio" aria-checked="false" data-target="البراعم">🔵 البراعم</button>
+          <button type="button" class="target-chip" role="radio" aria-checked="false" data-target="الابتدائية">🟢 الابتدائية</button>
+          <button type="button" class="target-chip" role="radio" aria-checked="false" data-target="المتوسطة">🟡 المتوسطة</button>
+          <button type="button" class="target-chip" role="radio" aria-checked="false" data-target="الشباب">🟠 الشباب</button>
+        </div>
+
+        <span class="alert-field-label">نص التنبيه</span>
+        <textarea id="alertText" class="alert-textarea" placeholder="اكتب نص التنبيه أو الإعلان الذي سيصل لأولياء الأمور..."></textarea>
+        <div>
+          <button type="button" class="alert-send" id="alertSend">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="m22 2-7 20-4-9-9-4Z"/><path d="M22 2 11 13"/></svg>
+            إرسال التنبيه
+          </button>
+        </div>
+      </div>
+
+      <div class="alert-log">
+        <div class="alert-log-title">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:15px;height:15px;color:var(--gold)"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>
+          آخر التنبيهات المرسلة
+        </div>
+        <div id="alertList">
+          <div class="alert-empty">لا توجد تنبيهات مرسلة بعد.</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+</main>
+
+<!-- ============ REGISTER MODAL (open over the dashboard) ============ -->
+<div class="scrim" id="scrim">
+  <div class="modal" role="dialog" aria-modal="true" aria-labelledby="mTitle">
+    <div class="modal-head">
+      <div>
+        <h3 id="mTitle">تسجيل لاعب جديد</h3>
+        <p>أدخل بيانات اللاعب لإنشاء ملف التحاق جديد</p>
+      </div>
+      <button class="x" id="closeX" aria-label="إغلاق">✕</button>
+    </div>
+    <form id="regForm">
+      <!-- Field 1 — full name -->
+      <div class="field">
+        <label>اسم اللاعب الثلاثي</label>
+        <input type="text" placeholder="مثال: عبدالله محمد الغامدي" required>
+      </div>
+
+      <!-- Field 2 — birth year (open dropdown) -->
+      <div class="field">
+        <label>سنة الميلاد</label>
+        <div class="od-select open" id="yearSelect">
+          <div class="od-control" id="yearControl" role="button" tabindex="0" aria-haspopup="listbox" aria-expanded="true">
+            <span id="yearValue">2003</span>
+            <svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg>
+          </div>
+          <div class="od-list" id="yearList" role="listbox" aria-label="سنة الميلاد">
+            <div class="od-opt">2000</div>
+            <div class="od-opt">2001</div>
+            <div class="od-opt">2002</div>
+            <div class="od-opt selected" aria-selected="true">2003</div>
+            <div class="od-opt">2004</div>
+            <div class="od-opt">2005</div>
+            <div class="od-opt">2006</div>
+            <div class="od-opt">2007</div>
+            <div class="od-opt">2008</div>
+            <div class="od-opt">2009</div>
+            <div class="od-opt">2010</div>
+            <div class="od-opt">2011</div>
+            <div class="od-opt">2012</div>
+            <div class="od-opt">2013</div>
+            <div class="od-opt">2014</div>
+            <div class="od-opt">2015</div>
+            <div class="od-opt">2016</div>
+            <div class="od-opt">2017</div>
+            <div class="od-opt">2018</div>
+            <div class="od-opt">2019</div>
+            <div class="od-opt">2020</div>
+            <div class="od-opt">2021</div>
+            <div class="od-opt">2022</div>
+            <div class="od-opt">2023</div>
+            <div class="od-opt">2024</div>
+            <div class="od-opt">2025</div>
+            <div class="od-opt">2026</div>
+            <div class="od-opt">2027</div>
+            <div class="od-opt">2028</div>
+            <div class="od-opt">2029</div>
+            <div class="od-opt">2030</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Field 3 — guardian phone -->
+      <div class="field">
+        <label>رقم ولي الأمر</label>
+        <input type="tel" inputmode="numeric" placeholder="05xxxxxxxx" required>
+      </div>
+
+      <div class="ok-msg" id="okMsg">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M21.6 7.5 9.7 19.4l-5.3-5.3"/></svg>
+        تم تسجيل اللاعب بنجاح وإضافته إلى قائمة الطلبات.
+      </div>
+
+      <div class="modal-foot">
+        <button type="submit" class="cta">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>
+          تأكيد التسجيل
+        </button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<script>
+(function(){
+  var nav=document.querySelectorAll('#nav a');
+  var panels=document.querySelectorAll('.tab-panel');
+  nav.forEach(function(t){t.addEventListener('click',function(e){e.preventDefault();
+    // 1) حالة الأزرار: إزالة النشاط من الكل ثم تفعيل المنقور (الأزرار تبقى ظاهرة دائماً)
+    nav.forEach(function(x){x.classList.remove('active')});t.classList.add('active');
+    // 2) تبديل المحتوى: إظهار القسم المطابق لـ data-tab فقط وإخفاء الباقي
+    var id='tab-'+t.getAttribute('data-tab');
+    panels.forEach(function(p){p.classList.toggle('active', p.id===id);});
+  });});
+
+  // ===== التنبيهات: إرسال تنبيه وإضافته لسجل آخر التنبيهات =====
+  function escapeHtml(s){return String(s).replace(/[&<>"']/g,function(c){
+    return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];});}
+  var alertText=document.getElementById('alertText'),
+      alertSend=document.getElementById('alertSend'),
+      alertList=document.getElementById('alertList'),
+      targetGroup=document.getElementById('targetGroup');
+
+  // اختيار الفئة المستهدفة (سلوك Radio: خيار واحد فقط نشط)
+  var selectedTarget='الكل';
+  if(targetGroup){
+    targetGroup.addEventListener('click',function(e){
+      var chip=e.target.closest('.target-chip'); if(!chip) return;
+      targetGroup.querySelectorAll('.target-chip').forEach(function(c){
+        c.classList.remove('active'); c.setAttribute('aria-checked','false');});
+      chip.classList.add('active'); chip.setAttribute('aria-checked','true');
+      selectedTarget=chip.getAttribute('data-target');
+    });
+  }
+
+  // ===== التحضير: تصفية اللاعبين حسب الفئة العمرية =====
+  var attFilter=document.getElementById('attFilter'),
+      attList=document.getElementById('attList'),
+      attEmpty=document.getElementById('attEmpty');
+  if(attFilter && attList){
+    attFilter.addEventListener('click',function(e){
+      var chip=e.target.closest('.att-chip'); if(!chip) return;
+      // حالة الأزرار (Radio: واحد فقط نشط)
+      attFilter.querySelectorAll('.att-chip').forEach(function(c){
+        c.classList.remove('active'); c.setAttribute('aria-checked','false');});
+      chip.classList.add('active'); chip.setAttribute('aria-checked','true');
+      // تطبيق التصفية: "الكل" يظهر الجميع، وإلا نطابق data-category
+      var cat=chip.getAttribute('data-cat'), shown=0;
+      attList.querySelectorAll('.att-row').forEach(function(row){
+        var match=(cat==='الكل' || (row.getAttribute('data-category')||'')===cat);
+        row.style.display=match?'':'none';
+        if(match) shown++;
+      });
+      if(attEmpty) attEmpty.style.display=shown?'none':'block';
+    });
+    // أزرار حاضر/غائب لكل لاعب
+    attList.addEventListener('click',function(e){
+      var btn=e.target.closest('.att-toggle'); if(!btn) return;
+      var row=btn.closest('.att-row');
+      row.querySelector('.present').classList.remove('active');
+      row.querySelector('.absent').classList.remove('active');
+      btn.classList.add('active');
+    });
+  }
+
+  if(alertSend){
+    alertSend.addEventListener('click',function(){
+      var msg=(alertText.value||'').trim();
+      if(!msg){ alertText.focus(); alertText.style.borderColor='var(--red)';
+        setTimeout(function(){alertText.style.borderColor='';},1200); return; }
+      var empty=alertList.querySelector('.alert-empty'); if(empty) empty.remove();
+      var now=new Date();
+      var stamp=now.toLocaleDateString('ar-SA')+' — '+
+                now.toLocaleTimeString('ar-SA',{hour:'2-digit',minute:'2-digit'});
+      var item=document.createElement('div');
+      item.className='alert-item';
+      item.innerHTML='<div class="a-text">'+escapeHtml(msg)+
+                     '<span class="a-target">🎯 '+escapeHtml(selectedTarget)+'</span></div>'+
+                     '<span class="a-date">🔔 '+escapeHtml(stamp)+'</span>';
+      alertList.insertBefore(item, alertList.firstChild); // الأحدث في الأعلى
+      alertText.value='';
+    });
+  }
+  var scrim=document.getElementById('scrim'),openBtn=document.getElementById('openRegister'),
+      closeX=document.getElementById('closeX'),
+      form=document.getElementById('regForm'),okMsg=document.getElementById('okMsg');
+  function open(){scrim.classList.add('open');document.body.style.overflow='hidden';}
+  function close(){scrim.classList.remove('open');document.body.style.overflow='';okMsg.classList.remove('show');}
+  if(openBtn) openBtn.addEventListener('click',open);
+  if(closeX) closeX.addEventListener('click',close);
+  scrim.addEventListener('click',function(e){if(e.target===scrim)close();});
+  document.addEventListener('keydown',function(e){if(e.key==='Escape')close();});
+
+  // open custom year dropdown
+  var ySel=document.getElementById('yearSelect'),yCtl=document.getElementById('yearControl'),
+      yVal=document.getElementById('yearValue'),yList=document.getElementById('yearList');
+  if(yCtl){
+    yCtl.addEventListener('click',function(){ ySel.classList.toggle('open'); yCtl.setAttribute('aria-expanded', ySel.classList.contains('open')); });
+    yList.addEventListener('click',function(e){
+      var opt=e.target.closest('.od-opt'); if(!opt) return;
+      yList.querySelectorAll('.od-opt').forEach(function(o){o.classList.remove('selected');o.removeAttribute('aria-selected');});
+      opt.classList.add('selected'); opt.setAttribute('aria-selected','true');
+      yVal.textContent=opt.textContent.trim(); ySel.classList.remove('open'); yCtl.setAttribute('aria-expanded','false');
+    });
+  }
+
+  form.addEventListener('submit',function(e){e.preventDefault();okMsg.classList.add('show');setTimeout(function(){close();},2000);});
+
+  // mockup state: registration panel starts open over the dashboard
+  if(scrim.classList.contains('open')) document.body.style.overflow='hidden';
+})();
+</script>
+</body>
+</html>
