@@ -300,19 +300,19 @@
 
   /* ============ REQUESTS (pending) ============ */
   .req-list{display:flex;flex-direction:column;gap:12px}
-  .req-card{display:flex;align-items:center;justify-content:space-between;gap:16px;
-    padding:16px 18px;background:var(--panel);border:1px solid var(--gold-line);border-radius:14px;
+  .req-card{display:flex;align-items:center;justify-content:space-between;gap:12px;
+    background:rgba(15,15,14,.55);border:1px solid var(--gold-line);border-radius:13px;padding:13px 16px;
     transition:opacity .25s ease,transform .25s ease}
   .req-card.removing{opacity:0;transform:translateX(-16px)}
-  .req-name{font-weight:800;font-size:16px}
-  .req-meta{display:flex;gap:16px;flex-wrap:wrap;color:var(--muted);font-size:13px;margin-top:6px}
-  .req-actions{display:flex;gap:10px;flex:none}
-  .req-btn{font-weight:700;font-size:14px;padding:10px 18px;border-radius:12px;border:1px solid transparent}
-  .req-btn:disabled{opacity:.6;cursor:default}
-  .req-btn.accept{background:rgba(95,207,128,.12);border-color:rgba(95,207,128,.35);color:var(--green)}
-  .req-btn.accept:hover{background:rgba(95,207,128,.2)}
-  .req-btn.reject{background:rgba(227,115,94,.10);border-color:var(--red-line);color:var(--red)}
-  .req-btn.reject:hover{background:rgba(227,115,94,.18)}
+  .req-info{display:flex;flex-direction:column;gap:6px}
+  .req-name{font-weight:800;color:#fff;font-size:15.5px}
+  .req-meta{display:flex;gap:14px;font-size:13px;color:var(--muted);font-weight:600}
+  .req-actions{display:flex;gap:8px;flex:none}
+  .req-btn{padding:8px 18px;border-radius:10px;border:1px solid var(--gold-line);
+    background:rgba(255,255,255,.04);color:var(--muted);font-family:inherit;font-weight:700;font-size:13.5px;cursor:pointer;transition:.18s}
+  .req-btn.accept:hover{background:#059669;border-color:#059669;color:#fff}
+  .req-btn.reject:hover{background:#dc2626;border-color:#dc2626;color:#fff}
+  .req-btn:disabled{opacity:.5;cursor:not-allowed}
 
   /* ============ RESPONSIVE ============ */
   @media (max-width:920px){
