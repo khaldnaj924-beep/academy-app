@@ -130,16 +130,17 @@ def view_dashboard():
         active_players = 0
         new_requests = 0
         expired_subscriptions = 0
-        
+        pending_list = []
+
         # تصفح شيت اللاعبين لحساب الإحصائيات
-        for row in all_records[1:]:
+        for idx, row in enumerate(all_records[1:], start=2):
             if len(row) >= 7:
                 status = row[6].strip()
-                
+
                 # 1. اللاعبين النشطين
                 if status == 'Approved':
                     active_players += 1
-                    
+
                     # 4. حساب الاشتراكات المنتهية (العمود التاسع Index 8)
                     end_date_raw = row[8].strip() if len(row) > 8 else ""
                     if end_date_raw and end_date_raw not in ("غير محدد", "---", ""):
@@ -151,10 +152,16 @@ def view_dashboard():
                                 break
                             except ValueError:
                                 continue
-                                
+
                 # 3. طلبات التسجيل الجديدة
                 elif status == 'Pending':
                     new_requests += 1
+                    pending_list.append({
+                        "row_index": idx,
+                        "name": row[1] if len(row) > 1 else "",
+                        "phone": row[3] if len(row) > 3 else "",
+                        "birth_year": row[2] if len(row) > 2 else ""
+                    })
                     
         # 2. حساب حضور اليوم من شيت التحضير
         today_attendance = 0
@@ -171,8 +178,9 @@ def view_dashboard():
         return render_template('index.html',
                                active_players=active_players, 
                                today_attendance=today_attendance, 
-                               new_requests=new_requests, 
-                               expired_subscriptions=expired_subscriptions)
+                               new_requests=new_requests,
+                               expired_subscriptions=expired_subscriptions,
+                               pending_list=pending_list)
     except Exception as e:
         return jsonify({"success": False, "message": str(e)}), 500
 

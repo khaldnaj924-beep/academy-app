@@ -298,6 +298,22 @@
   .ok-msg.show{display:flex}
   .ok-msg svg{width:18px;height:18px;flex:none}
 
+  /* ============ REQUESTS (pending) ============ */
+  .req-list{display:flex;flex-direction:column;gap:12px}
+  .req-card{display:flex;align-items:center;justify-content:space-between;gap:16px;
+    padding:16px 18px;background:var(--panel);border:1px solid var(--gold-line);border-radius:14px;
+    transition:opacity .25s ease,transform .25s ease}
+  .req-card.removing{opacity:0;transform:translateX(-16px)}
+  .req-name{font-weight:800;font-size:16px}
+  .req-meta{display:flex;gap:16px;flex-wrap:wrap;color:var(--muted);font-size:13px;margin-top:6px}
+  .req-actions{display:flex;gap:10px;flex:none}
+  .req-btn{font-weight:700;font-size:14px;padding:10px 18px;border-radius:12px;border:1px solid transparent}
+  .req-btn:disabled{opacity:.6;cursor:default}
+  .req-btn.accept{background:rgba(95,207,128,.12);border-color:rgba(95,207,128,.35);color:var(--green)}
+  .req-btn.accept:hover{background:rgba(95,207,128,.2)}
+  .req-btn.reject{background:rgba(227,115,94,.10);border-color:var(--red-line);color:var(--red)}
+  .req-btn.reject:hover{background:rgba(227,115,94,.18)}
+
   /* ============ RESPONSIVE ============ */
   @media (max-width:920px){
     .topbar-inner{flex-wrap:wrap;gap:14px}
@@ -568,7 +584,24 @@
     <section class="hero"><h1>طلبات الالتحاق <span class="accent">المعلقة</span></h1></section>
     <div class="panel" style="margin-top:22px">
       <div class="panel-title"><span class="tdot"></span> الطلبات الجديدة بانتظار المراجعة</div>
-      <p style="color:var(--muted);margin-top:12px">سيتم عرض طلبات التسجيل الجديدة هنا.</p>
+      <div class="req-list" id="reqList" style="margin-top:18px">
+        {% for p in pending_list %}
+        <div class="req-card" data-row="{{ p.row_index }}">
+          <div class="req-info">
+            <div class="req-name">{{ p.name }}</div>
+            <div class="req-meta">
+              <span>📱 {{ p.phone }}</span>
+              <span>🎂 {{ p.birth_year }}</span>
+            </div>
+          </div>
+          <div class="req-actions">
+            <button type="button" class="req-btn accept" onclick="updateStatus(this, {{ p.row_index }}, 'Approved')">قبول</button>
+            <button type="button" class="req-btn reject" onclick="updateStatus(this, {{ p.row_index }}, 'Rejected')">رفض</button>
+          </div>
+        </div>
+        {% endfor %}
+      </div>
+      <p class="req-empty" id="reqEmpty" style="color:var(--muted);margin-top:12px;{% if pending_list %}display:none{% endif %}">لا توجد طلبات جديدة بانتظار المراجعة.</p>
     </div>
   </section>
 
@@ -920,6 +953,40 @@
 
   // mockup state: registration panel starts open over the dashboard
   if(scrim.classList.contains('open')) document.body.style.overflow='hidden';
+
+  // ===== Pending requests: accept / reject =====
+  window.updateStatus=function(btn, rowIndex, status){
+    var card=btn.closest('.req-card');
+    var actionBtns=card.querySelectorAll('.req-btn');
+    actionBtns.forEach(function(b){ b.disabled=true; });
+
+    fetch('/update_player_status',{
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({ row_index: rowIndex, status: status })
+    })
+    .then(function(r){ return r.json(); })
+    .then(function(res){
+      if(res.success){
+        card.classList.add('removing');
+        setTimeout(function(){
+          card.remove();
+          var list=document.getElementById('reqList');
+          if(list && !list.querySelector('.req-card')){
+            var empty=document.getElementById('reqEmpty');
+            if(empty) empty.style.display='';
+          }
+        }, 250);
+      } else {
+        actionBtns.forEach(function(b){ b.disabled=false; });
+        alert(res.message || 'حدث خطأ، حاول مجدداً');
+      }
+    })
+    .catch(function(){
+      actionBtns.forEach(function(b){ b.disabled=false; });
+      alert('خطأ في الاتصال بالسيرفر');
+    });
+  };
 })();
 </script>
 </body>
