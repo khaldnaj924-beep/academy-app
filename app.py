@@ -285,6 +285,61 @@ def update_player_status():
     except Exception as e:
         return jsonify({"success": False, "message": str(e)}), 500
 
+# 3.1 مسار تسجيل حضور/غياب لاعب واحد فورياً عند الضغط على الزر
+@app.route('/mark_attendance', methods=['POST'])
+def mark_attendance():
+    err = require_sheet()
+    if err: return err
+    if attendance_sheet is None:
+        return jsonify({"success": False, "message": "ورقة التحضير غير متاحة"}), 503
+    try:
+        data = request.get_json(silent=True)
+        if not data:
+            return jsonify({"success": False, "message": "البيانات غير صالحة"}), 400
+
+        status = sanitize_input(data.get('status', ''), max_len=10)
+        if status not in ('حاضر', 'غائب'):
+            return jsonify({"success": False, "message": "حالة غير صالحة"}), 400
+
+        try:
+            row_idx = int(data.get('row_index'))
+            if row_idx < 2: raise ValueError
+        except (ValueError, TypeError):
+            return jsonify({"success": False, "message": "معرّف الصف غير صالح"}), 400
+
+        today_str = datetime.now().strftime("%Y-%m-%d")
+
+        with _sheets_lock:
+            # جلب اسم اللاعب من الشيت الرئيسي (لا نثق باسم يرسله العميل)
+            try:
+                name = (sheet.cell(row_idx, 2).value or "").strip()
+            except Exception:
+                return jsonify({"success": False, "message": "الصف غير موجود في الشيت"}), 404
+            if not name:
+                return jsonify({"success": False, "message": "لا يوجد لاعب في هذا الصف"}), 404
+
+            # تحديث سجل اليوم إن وُجد، وإلا إضافة سجل جديد (لتفادي التكرار عند التبديل)
+            att_values = attendance_sheet.get_all_values()
+            found_row = None
+            for i, r in enumerate(att_values[1:], start=2):
+                if len(r) >= 2 and r[0].strip() == today_str and r[1].strip() == name:
+                    found_row = i
+                    break
+            if found_row:
+                attendance_sheet.update_cell(found_row, 3, status)
+            else:
+                attendance_sheet.append_row([today_str, name, status, "", "", ""])
+            invalidate_cache()
+
+        return jsonify({"success": True, "message": f"تم تسجيل «{status}» لـ {name}"}), 200
+    except gspread.exceptions.APIError as e:
+        msg = str(e)
+        if 'quota' in msg.lower() or '429' in msg:
+            return jsonify({"success": False, "message": "تم تجاوز الحد المسموح به من Google API. حاول بعد دقيقة."}), 429
+        return jsonify({"success": False, "message": f"خطأ في Google Sheets: {msg}"}), 502
+    except Exception as e:
+        return jsonify({"success": False, "message": str(e)}), 500
+
 # 4. مسار جلب اللاعبين المقبولين فقط
 def get_age_category(birth_year_str):
     try:
@@ -294,6 +349,7 @@ def get_age_category(birth_year_str):
         if 4 <= age <= 9: return "البراعم"
         elif 10 <= age <= 12: return "الابتدائية"
         elif 13 <= age <= 15: return "المتوسطة"
+        elif age >= 16: return "الشباب"
         else: return "غير محدد"
     except (ValueError, TypeError):
         return "غير محدد"

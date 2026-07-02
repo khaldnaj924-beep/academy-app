@@ -623,7 +623,7 @@
         <div class="att-row" data-category="{{ p.category }}" data-row="{{ p.row_index }}">
           <div class="a-name">{{ p.name }} <span class="att-cat">{{ p.category }}</span></div>
           <div class="att-toggles">
-            <button type="button" class="att-toggle present active">حاضر</button>
+            <button type="button" class="att-toggle present">حاضر</button>
             <button type="button" class="att-toggle absent">غائب</button>
           </div>
         </div>
@@ -836,13 +836,48 @@
       });
       if(attEmpty) attEmpty.style.display=shown?'none':'block';
     });
-    // أزرار حاضر/غائب لكل لاعب
+    // أزرار حاضر/غائب لكل لاعب — تحفظ فوراً في Google Sheet
     attList.addEventListener('click',function(e){
       var btn=e.target.closest('.att-toggle'); if(!btn) return;
       var row=btn.closest('.att-row');
-      row.querySelector('.present').classList.remove('active');
-      row.querySelector('.absent').classList.remove('active');
+      if(btn.disabled) return;
+
+      var presentBtn=row.querySelector('.present'),
+          absentBtn=row.querySelector('.absent');
+      // حفظ الحالة السابقة للتراجع عند الفشل
+      var prevPresent=presentBtn.classList.contains('active'),
+          prevAbsent=absentBtn.classList.contains('active');
+
+      // تحديث تفاؤلي للواجهة
+      presentBtn.classList.remove('active');
+      absentBtn.classList.remove('active');
       btn.classList.add('active');
+
+      var rowIndex=parseInt(row.getAttribute('data-row'),10);
+      var status=btn.classList.contains('present')?'حاضر':'غائب';
+      presentBtn.disabled=true; absentBtn.disabled=true;
+
+      fetch('/mark_attendance',{
+        method:'POST',
+        headers:{'Content-Type':'application/json'},
+        body:JSON.stringify({row_index:rowIndex,status:status})
+      })
+      .then(function(r){return r.json();})
+      .then(function(res){
+        presentBtn.disabled=false; absentBtn.disabled=false;
+        if(!res.success){
+          // تراجع للحالة السابقة
+          presentBtn.classList.toggle('active',prevPresent);
+          absentBtn.classList.toggle('active',prevAbsent);
+          alert(res.message||'حدث خطأ أثناء الحفظ');
+        }
+      })
+      .catch(function(){
+        presentBtn.disabled=false; absentBtn.disabled=false;
+        presentBtn.classList.toggle('active',prevPresent);
+        absentBtn.classList.toggle('active',prevAbsent);
+        alert('خطأ في الاتصال بالسيرفر');
+      });
     });
   }
 
