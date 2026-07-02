@@ -488,36 +488,68 @@ def save_dashboard():
         if not isinstance(players, list) or len(players) == 0:
             return jsonify({"success": False, "message": "لا يوجد لاعبون لحفظهم"}), 400
 
-        cell_updates = []
-        attendance_rows = []
+        cell_updates = []   # تحديثات الطول/الوزن على الشيت الرئيسي
+        att_updates = []    # تحديث سجلات تحضير موجودة (نفس التاريخ + معرّف اللاعب)
+        att_appends = []    # سجلات تحضير جديدة
+        saved_count = 0
 
-        for p in players:
-            try:
-                row_idx = int(p.get('row_index', 0))
-                if row_idx < 2: continue
-            except (ValueError, TypeError):
-                continue
-
-            name   = sanitize_input(p.get('name', ''), max_len=80)
-            height = sanitize_input(p.get('height', ''), max_len=10)
-            weight = sanitize_input(p.get('weight', ''), max_len=10)
-            status = sanitize_input(p.get('status', 'غائب'), max_len=10)
-
-            if status not in ('حاضر', 'غائب'):
-                status = 'غائب'
-
-            if height:
-                cell_updates.append({'range': f'E{row_idx}', 'values': [[height]]})
-            if weight:
-                cell_updates.append({'range': f'F{row_idx}', 'values': [[weight]]})
-
-            attendance_rows.append([date, name, status, height, weight, announcement])
+        # قيم الشيت الرئيسي لاستخراج معرّف اللاعب (العمود الأول) حسب رقم الصف
+        main_values = get_sheet_values_cached()
 
         with _sheets_lock:
+            # فهرسة سجلات التحضير الحالية حسب (التاريخ + معرّف اللاعب) لتفادي التكرار
+            att_values = attendance_sheet.get_all_values()
+            att_index = {}
+            for i, r in enumerate(att_values[1:], start=2):
+                if len(r) >= 7 and r[6].strip():
+                    att_index[(r[0].strip(), r[6].strip())] = i
+
+            for p in players:
+                try:
+                    row_idx = int(p.get('row_index', 0))
+                    if row_idx < 2: continue
+                except (ValueError, TypeError):
+                    continue
+
+                name   = sanitize_input(p.get('name', ''), max_len=80)
+                height = sanitize_input(p.get('height', ''), max_len=10)
+                weight = sanitize_input(p.get('weight', ''), max_len=10)
+                status = sanitize_input(p.get('status', 'غائب'), max_len=10)
+
+                if status not in ('حاضر', 'غائب'):
+                    status = 'غائب'
+
+                # 🆔 معرّف اللاعب من العمود الأول للشيت الرئيسي (المطابقة بالمعرّف لا بالاسم)
+                player_id = ""
+                if 0 < row_idx <= len(main_values):
+                    mrow = main_values[row_idx - 1]
+                    player_id = mrow[0].strip() if mrow and mrow[0] else ""
+                if not player_id:
+                    continue  # بدون معرّف فريد لا نحفظ للحفاظ على الاتساق
+
+                if height:
+                    cell_updates.append({'range': f'E{row_idx}', 'values': [[height]]})
+                if weight:
+                    cell_updates.append({'range': f'F{row_idx}', 'values': [[weight]]})
+
+                existing = att_index.get((date, player_id))
+                if existing:
+                    # تحديث سجل نفس اليوم بدل إضافة صف مكرّر (B..G)
+                    att_updates.append({
+                        'range': f'B{existing}:G{existing}',
+                        'values': [[name, status, height, weight, announcement, player_id]]
+                    })
+                else:
+                    # العمود السابع (G) يخزّن معرّف اللاعب
+                    att_appends.append([date, name, status, height, weight, announcement, player_id])
+                saved_count += 1
+
             if cell_updates:
                 sheet.batch_update(cell_updates)
-            if attendance_rows:
-                attendance_sheet.append_rows(attendance_rows)
+            if att_updates:
+                attendance_sheet.batch_update(att_updates)
+            if att_appends:
+                attendance_sheet.append_rows(att_appends)
             invalidate_cache()
 
         # 🔔 إرسال تنبيهات الغياب في الخلفية (لا يبطئ الاستجابة)
@@ -554,7 +586,7 @@ def save_dashboard():
 
         return jsonify({
             "success": True,
-            "message": f"تم حفظ {len(attendance_rows)} سجل ميداني بنجاح! 🏆"
+            "message": f"تم حفظ {saved_count} سجل ميداني بنجاح! 🏆"
         }), 200
     except gspread.exceptions.APIError as e:
         msg = str(e)
