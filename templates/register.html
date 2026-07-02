@@ -344,18 +344,51 @@
 <script>
 (function(){
   var form=document.getElementById('regForm'),okMsg=document.getElementById('okMsg');
+  var submitBtn=form.querySelector('.submit');
+
   form.addEventListener('submit',function(e){
     e.preventDefault();
-    var name=document.getElementById('fullName'),phone=document.getElementById('guardian');
+    var name=document.getElementById('fullName');
+    var phone=document.getElementById('guardian');
+    var birthYear=document.getElementById('birthYear');
     var valid=true;
+
     [name,phone].forEach(function(el){
       if(!el.value.trim()){ el.style.borderColor='var(--red)'; valid=false; }
       else{ el.style.borderColor=''; }
     });
-    if(!valid){ okMsg.classList.remove('show'); return; }
-    okMsg.classList.add('show');
-    setTimeout(function(){ form.reset(); okMsg.classList.remove('show'); }, 2200);
+    if(!valid){ return; }
+
+    submitBtn.disabled=true;
+    submitBtn.style.opacity='0.7';
+
+    fetch('/register',{
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({
+        name: name.value.trim(),
+        phone: phone.value.trim(),
+        birth_year: birthYear.value
+      })
+    })
+    .then(function(r){ return r.json(); })
+    .then(function(res){
+      submitBtn.disabled=false;
+      submitBtn.style.opacity='';
+      if(res.success){
+        okMsg.classList.add('show');
+        setTimeout(function(){ form.reset(); okMsg.classList.remove('show'); }, 2200);
+      } else {
+        alert(res.message || 'حدث خطأ، حاول مجدداً');
+      }
+    })
+    .catch(function(){
+      submitBtn.disabled=false;
+      submitBtn.style.opacity='';
+      alert('خطأ في الاتصال بالسيرفر');
+    });
   });
+
   ['fullName','guardian'].forEach(function(id){
     document.getElementById(id).addEventListener('input',function(){ this.style.borderColor=''; });
   });
