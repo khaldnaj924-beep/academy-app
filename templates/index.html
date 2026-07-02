@@ -319,6 +319,29 @@
     .req-btn{flex:1;text-align:center}
   }
 
+  /* ============ SUBSCRIPTIONS ============ */
+  .subs-list{display:flex;flex-direction:column;gap:12px}
+  .subs-card{display:flex;align-items:center;justify-content:space-between;gap:12px;
+    background:rgba(15,15,14,.55);border:1px solid var(--gold-line);border-radius:13px;padding:13px 16px;
+    transition:opacity .25s ease}
+  .subs-info{display:flex;flex-direction:column;gap:6px}
+  .subs-name{font-weight:800;color:#fff;font-size:15.5px;display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+  .subs-meta{display:flex;gap:14px;font-size:13px;color:var(--muted);font-weight:600;flex-wrap:wrap}
+  .subs-badge{font-weight:700}
+  .subs-badge.active{color:#34d399}
+  .subs-badge.expired{color:#f87171}
+  .subs-badge.unknown{color:var(--muted)}
+  .subs-actions{display:flex;gap:8px;flex:none}
+  .subs-btn{padding:8px 18px;border-radius:10px;border:1px solid var(--gold-line);
+    background:rgba(255,255,255,.04);color:var(--gold);font-family:inherit;font-weight:700;font-size:13.5px;cursor:pointer;transition:.18s}
+  .subs-btn.renew:hover{background:var(--gold);border-color:var(--gold);color:#000}
+  .subs-btn:disabled{opacity:.5;cursor:not-allowed}
+  @media (max-width:600px){
+    .subs-card{flex-direction:column;align-items:stretch;gap:14px}
+    .subs-actions{width:100%}
+    .subs-btn{flex:1;text-align:center}
+  }
+
   /* ============ MATCH FIELDS (notifications) ============ */
   .match-fields{display:flex;flex-direction:row;gap:12px;width:100%}
   .match-field{flex:1;min-width:0}
@@ -598,7 +621,23 @@
     <section class="hero"><h1>حالة <span class="accent">الاشتراكات</span></h1></section>
     <div class="panel" style="margin-top:22px">
       <div class="panel-title"><span class="tdot"></span> الاشتراكات السارية والمنتهية</div>
-      <p style="color:var(--muted);margin-top:12px">سيتم عرض حالة اشتراكات اللاعبين هنا.</p>
+      <div class="subs-list" id="subsList" style="margin-top:18px">
+        {% for p in approved_list %}
+        <div class="subs-card" data-row="{{ p.row_index }}" data-name="{{ p.name }}">
+          <div class="subs-info">
+            <div class="subs-name">{{ p.name }} <span class="att-cat">{{ p.category }}</span></div>
+            <div class="subs-meta">
+              <span class="subs-badge {{ p.sub_status }}">{% if p.sub_status == 'active' %}🟢 سارية{% elif p.sub_status == 'expired' %}🔴 منتهية{% else %}⚪ غير محدد{% endif %}</span>
+              <span class="subs-end">📅 ينتهي: {{ p.end_date }}</span>
+            </div>
+          </div>
+          <div class="subs-actions">
+            <button type="button" class="subs-btn renew">تجديد</button>
+          </div>
+        </div>
+        {% endfor %}
+      </div>
+      <p class="subs-empty" id="subsEmpty" style="color:var(--muted);margin-top:12px;{% if approved_list %}display:none{% endif %}">لا يوجد لاعبون مشتركون حالياً.</p>
     </div>
   </section>
 
@@ -623,8 +662,8 @@
         <div class="att-row" data-category="{{ p.category }}" data-row="{{ p.row_index }}">
           <div class="a-name">{{ p.name }} <span class="att-cat">{{ p.category }}</span></div>
           <div class="att-toggles">
-            <button type="button" class="att-toggle present">حاضر</button>
-            <button type="button" class="att-toggle absent">غائب</button>
+            <button type="button" class="att-toggle present{% if p.today_status == 'حاضر' %} active{% endif %}">حاضر</button>
+            <button type="button" class="att-toggle absent{% if p.today_status == 'غائب' %} active{% endif %}">غائب</button>
           </div>
         </div>
         {% endfor %}
@@ -977,6 +1016,42 @@
       alert('خطأ في الاتصال بالسيرفر');
     });
   };
+
+  // ===== Subscriptions: renew =====
+  var subsList=document.getElementById('subsList');
+  if(subsList){
+    subsList.addEventListener('click',function(e){
+      var btn=e.target.closest('.subs-btn.renew'); if(!btn) return;
+      if(btn.disabled) return;
+      var card=btn.closest('.subs-card');
+      var rowIndex=parseInt(card.getAttribute('data-row'),10);
+      var name=card.getAttribute('data-name')||'';
+      var origText=btn.textContent;
+      btn.disabled=true; btn.textContent='...';
+
+      fetch('/renew_subscription',{
+        method:'POST',
+        headers:{'Content-Type':'application/json'},
+        body:JSON.stringify({ row_index: rowIndex, name: name })
+      })
+      .then(function(r){ return r.json(); })
+      .then(function(res){
+        btn.disabled=false; btn.textContent=origText;
+        if(res.success){
+          var badge=card.querySelector('.subs-badge');
+          if(badge){ badge.className='subs-badge active'; badge.textContent='🟢 سارية'; }
+          var endEl=card.querySelector('.subs-end');
+          if(endEl && res.new_end_date){ endEl.textContent='📅 ينتهي: '+res.new_end_date; }
+        } else {
+          alert(res.message || 'حدث خطأ أثناء التجديد');
+        }
+      })
+      .catch(function(){
+        btn.disabled=false; btn.textContent=origText;
+        alert('خطأ في الاتصال بالسيرفر');
+      });
+    });
+  }
 })();
 </script>
 </body>

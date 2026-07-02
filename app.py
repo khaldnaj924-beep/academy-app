@@ -133,7 +133,20 @@ def view_dashboard():
         pending_list = []
         approved_list = []
 
-        # تصفح شيت اللاعبين لحساب الإحصائيات
+        # 2. حساب حضور اليوم من شيت التحضير (خريطة: اسم اللاعب -> الحالة)
+        today_attendance_map = {}
+        if attendance_sheet is not None:
+            with _sheets_lock:
+                attendance_records = attendance_sheet.get_all_values()
+            for arow in attendance_records[1:]:
+                if len(arow) >= 3 and arow[0].strip() == today_str:
+                    nm = arow[1].strip()
+                    st = arow[2].strip()
+                    if nm and st in ('حاضر', 'غائب'):
+                        today_attendance_map[nm] = st
+        today_attendance = sum(1 for v in today_attendance_map.values() if v == 'حاضر')
+
+        # تصفح شيت اللاعبين لحساب الإحصائيات والقوائم
         for idx, row in enumerate(all_records[1:], start=2):
             if len(row) >= 7:
                 status = row[6].strip()
@@ -141,8 +154,9 @@ def view_dashboard():
                 # 1. اللاعبين النشطين
                 if status == 'Approved':
                     active_players += 1
+                    name = row[1] if len(row) > 1 else ""
 
-                    # قائمة اللاعبين المقبولين لعرضها في تبويب التحضير
+                    # استخراج سنة الميلاد لتحديد الفئة العمرية
                     dob_raw = row[2] if len(row) > 2 else ""
                     birth_year = ""
                     if dob_raw:
@@ -151,23 +165,34 @@ def view_dashboard():
                             birth_year = parts[0] if len(parts[0]) == 4 else parts[2]
                         elif len(parts) == 1:
                             birth_year = parts[0]
-                    approved_list.append({
-                        "row_index": idx,
-                        "name": row[1] if len(row) > 1 else "",
-                        "category": get_age_category(birth_year)
-                    })
 
-                    # 4. حساب الاشتراكات المنتهية (العمود التاسع Index 8)
+                    # 4. حالة الاشتراك (العمود التاسع Index 8)
                     end_date_raw = row[8].strip() if len(row) > 8 else ""
+                    sub_status = "unknown"
+                    end_display = "غير محدد"
                     if end_date_raw and end_date_raw not in ("غير محدد", "---", ""):
                         for fmt in ("%Y-%m-%d", "%d/%m/%Y", "%Y/%m/%d"):
                             try:
                                 parsed_date = datetime.strptime(end_date_raw, fmt).date()
+                                end_display = parsed_date.strftime("%Y-%m-%d")
                                 if parsed_date < today:
+                                    sub_status = "expired"
                                     expired_subscriptions += 1
+                                else:
+                                    sub_status = "active"
                                 break
                             except ValueError:
                                 continue
+
+                    # قائمة اللاعبين المقبولين (تُستخدم في تبويبي التحضير والاشتراكات)
+                    approved_list.append({
+                        "row_index": idx,
+                        "name": name,
+                        "category": get_age_category(birth_year),
+                        "today_status": today_attendance_map.get(name.strip(), ""),
+                        "end_date": end_display,
+                        "sub_status": sub_status
+                    })
 
                 # 3. طلبات التسجيل الجديدة
                 elif status == 'Pending':
@@ -178,18 +203,7 @@ def view_dashboard():
                         "phone": row[3] if len(row) > 3 else "",
                         "birth_year": row[2] if len(row) > 2 else ""
                     })
-                    
-        # 2. حساب حضور اليوم من شيت التحضير
-        today_attendance = 0
-        if attendance_sheet is not None:
-            with _sheets_lock:
-                attendance_records = attendance_sheet.get_all_values()
-            for row in attendance_records[1:]:
-                if len(row) >= 3:
-                    # التحقق من مطابقة تاريخ اليوم وحالة الحضور
-                    if row[0].strip() == today_str and row[2].strip() == 'حاضر':
-                        today_attendance += 1
-                        
+
         # تمرير الأرقام الحقيقية المحسوبة إلى ملف الـ HTML
         return render_template('index.html',
                                active_players=active_players, 
