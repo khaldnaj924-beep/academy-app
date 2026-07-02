@@ -76,7 +76,7 @@ try:
         attendance_sheet = spreadsheet.worksheet(ATTENDANCE_WORKSHEET_NAME)
     except gspread.exceptions.WorksheetNotFound:
         attendance_sheet = spreadsheet.add_worksheet(title=ATTENDANCE_WORKSHEET_NAME, rows="1000", cols="6")
-        attendance_sheet.append_row(["التاريخ", "اسم اللاعب", "الحالة", "الطول", "الوزن", "تنبيهات المدرب"])
+        attendance_sheet.append_row(["التاريخ", "اسم اللاعب", "الحالة", "الطول", "الوزن", "تنبيهات المدرب", "معرف اللاعب"])
 except Exception as e:
     print(f"Error connecting to Google Sheets: {e}")
 
@@ -133,17 +133,17 @@ def view_dashboard():
         pending_list = []
         approved_list = []
 
-        # 2. حساب حضور اليوم من شيت التحضير (خريطة: اسم اللاعب -> الحالة)
+        # 2. حساب حضور اليوم من شيت التحضير (خريطة: معرّف اللاعب -> الحالة)
         today_attendance_map = {}
         if attendance_sheet is not None:
             with _sheets_lock:
                 attendance_records = attendance_sheet.get_all_values()
             for arow in attendance_records[1:]:
-                if len(arow) >= 3 and arow[0].strip() == today_str:
-                    nm = arow[1].strip()
+                if len(arow) >= 7 and arow[0].strip() == today_str:
+                    pid = arow[6].strip()
                     st = arow[2].strip()
-                    if nm and st in ('حاضر', 'غائب'):
-                        today_attendance_map[nm] = st
+                    if pid and st in ('حاضر', 'غائب'):
+                        today_attendance_map[pid] = st
         today_attendance = sum(1 for v in today_attendance_map.values() if v == 'حاضر')
 
         # تصفح شيت اللاعبين لحساب الإحصائيات والقوائم
@@ -155,6 +155,7 @@ def view_dashboard():
                 if status == 'Approved':
                     active_players += 1
                     name = row[1] if len(row) > 1 else ""
+                    player_id = row[0].strip() if row and row[0] else ""
 
                     # استخراج سنة الميلاد لتحديد الفئة العمرية
                     dob_raw = row[2] if len(row) > 2 else ""
@@ -187,9 +188,10 @@ def view_dashboard():
                     # قائمة اللاعبين المقبولين (تُستخدم في تبويبي التحضير والاشتراكات)
                     approved_list.append({
                         "row_index": idx,
+                        "player_id": player_id,
                         "name": name,
                         "category": get_age_category(birth_year),
-                        "today_status": today_attendance_map.get(name.strip(), ""),
+                        "today_status": today_attendance_map.get(player_id, ""),
                         "end_date": end_display,
                         "sub_status": sub_status
                     })
@@ -315,34 +317,36 @@ def mark_attendance():
         if status not in ('حاضر', 'غائب'):
             return jsonify({"success": False, "message": "حالة غير صالحة"}), 400
 
-        try:
-            row_idx = int(data.get('row_index'))
-            if row_idx < 2: raise ValueError
-        except (ValueError, TypeError):
-            return jsonify({"success": False, "message": "معرّف الصف غير صالح"}), 400
+        # 🆔 نعتمد على معرّف اللاعب الفريد (العمود الأول) بدلاً من الاسم لتفادي تكرار الأسماء
+        player_id = sanitize_input(data.get('player_id', ''), max_len=20)
+        if not player_id:
+            return jsonify({"success": False, "message": "معرّف اللاعب مفقود"}), 400
+
+        # جلب اسم اللاعب من الشيت الرئيسي عبر معرّف اللاعب (لا نثق باسم يرسله العميل)
+        all_records = get_sheet_values_cached()
+        name = ""
+        for r in all_records[1:]:
+            if r and r[0].strip() == player_id:
+                name = (r[1].strip() if len(r) > 1 else "")
+                break
+        if not name:
+            return jsonify({"success": False, "message": "لا يوجد لاعب بهذا المعرّف"}), 404
 
         today_str = datetime.now().strftime("%Y-%m-%d")
 
         with _sheets_lock:
-            # جلب اسم اللاعب من الشيت الرئيسي (لا نثق باسم يرسله العميل)
-            try:
-                name = (sheet.cell(row_idx, 2).value or "").strip()
-            except Exception:
-                return jsonify({"success": False, "message": "الصف غير موجود في الشيت"}), 404
-            if not name:
-                return jsonify({"success": False, "message": "لا يوجد لاعب في هذا الصف"}), 404
-
-            # تحديث سجل اليوم إن وُجد، وإلا إضافة سجل جديد (لتفادي التكرار عند التبديل)
+            # تحديث سجل اليوم لهذا المعرّف إن وُجد، وإلا إضافة سجل جديد (لتفادي التكرار عند التبديل)
             att_values = attendance_sheet.get_all_values()
             found_row = None
             for i, r in enumerate(att_values[1:], start=2):
-                if len(r) >= 2 and r[0].strip() == today_str and r[1].strip() == name:
+                if len(r) >= 7 and r[0].strip() == today_str and r[6].strip() == player_id:
                     found_row = i
                     break
             if found_row:
                 attendance_sheet.update_cell(found_row, 3, status)
             else:
-                attendance_sheet.append_row([today_str, name, status, "", "", ""])
+                # العمود السابع (G) يخزّن معرّف اللاعب للمطابقة المستقبلية
+                attendance_sheet.append_row([today_str, name, status, "", "", "", player_id])
             invalidate_cache()
 
         return jsonify({"success": True, "message": f"تم تسجيل «{status}» لـ {name}"}), 200

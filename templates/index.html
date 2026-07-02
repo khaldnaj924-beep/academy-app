@@ -659,7 +659,7 @@
       <!-- قائمة اللاعبين — تُملأ ديناميكياً من اللاعبين المقبولين. data-category هو مفتاح التصفية -->
       <div class="att-list" id="attList">
         {% for p in approved_list %}
-        <div class="att-row" data-category="{{ p.category }}" data-row="{{ p.row_index }}">
+        <div class="att-row" data-category="{{ p.category }}" data-id="{{ p.player_id }}">
           <div class="a-name">{{ p.name }} <span class="att-cat">{{ p.category }}</span></div>
           <div class="att-toggles">
             <button type="button" class="att-toggle present{% if p.today_status == 'حاضر' %} active{% endif %}">حاضر</button>
@@ -892,14 +892,14 @@
       absentBtn.classList.remove('active');
       btn.classList.add('active');
 
-      var rowIndex=parseInt(row.getAttribute('data-row'),10);
+      var playerId=row.getAttribute('data-id');
       var status=btn.classList.contains('present')?'حاضر':'غائب';
       presentBtn.disabled=true; absentBtn.disabled=true;
 
       fetch('/mark_attendance',{
         method:'POST',
         headers:{'Content-Type':'application/json'},
-        body:JSON.stringify({row_index:rowIndex,status:status})
+        body:JSON.stringify({player_id:playerId,status:status})
       })
       .then(function(r){return r.json();})
       .then(function(res){
