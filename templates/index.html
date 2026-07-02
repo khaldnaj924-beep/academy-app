@@ -538,29 +538,13 @@
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="m3 7 9 6 9-6"/></svg>
       </div>
       <div class="sc-label">طلبات الالتحاق الجديدة (الانتظار)</div>
-      <div class="sc-value">5</div>
+      <div class="sc-value">0</div>
     </div>
 
     <!-- BOTTOM-RIGHT — active players donut -->
     <div class="panel donut-panel">
       <div class="panel-title"><span class="tdot"></span> حالة اللاعبين النشطين</div>
-      <div class="donut-wrap">
-        <div class="donut-stack">
-          <div class="donut" role="img" aria-label="توزيع اللاعبين النشطين"></div>
-          <div class="donut-hole">
-            <div class="v">342</div>
-            <div class="l">إجمالي اللاعبين</div>
-          </div>
-        </div>
-
-        <div class="legend">
-          <div class="leg-row"><span class="ld" style="background:#F2CA50;box-shadow:0 0 8px rgba(242,202,80,.6)"></span><span class="ln">فريق الشباب</span><span class="lp">30%</span></div>
-          <div class="leg-row"><span class="ld" style="background:#d9ad3a"></span><span class="ln">تحت 15 سنة</span><span class="lp">20%</span></div>
-          <div class="leg-row"><span class="ld" style="background:#bd942d"></span><span class="ln">الفريق الأول</span><span class="lp">22%</span></div>
-          <div class="leg-row"><span class="ld" style="background:#977321"></span><span class="ln">تحت 17 سنة</span><span class="lp">18%</span></div>
-          <div class="leg-row"><span class="ld" style="background:#6e561a"></span><span class="ln">تحت 13 سنة</span><span class="lp">10%</span></div>
-        </div>
-      </div>
+      <p class="no-data" style="color:var(--muted);text-align:center;margin:32px 0">لا توجد بيانات حالياً</p>
     </div>
 
     <!-- BOTTOM-LEFT — live attendance bar chart -->
@@ -568,24 +552,9 @@
       <div class="chart-top">
         <div>
           <div class="panel-title"><span class="tdot"></span> تحضير اليوم المباشر</div>
-          <div class="big-val">128 <small>حاضر اليوم من أصل 147</small></div>
-        </div>
-        <div class="legend-mini">
-          <span><i class="lg-gold"></i> الحضور</span>
-          <span><i class="lg-grey"></i> السعة</span>
         </div>
       </div>
-      <div class="chart-area">
-        <div class="bars">
-          <div class="bar-col"><div class="bar-wrap"><div class="bar-grey" style="height:70%"></div><div class="bar-gold" style="height:64%"></div></div><div class="bar-day">الإثنين</div></div>
-          <div class="bar-col"><div class="bar-wrap"><div class="bar-grey" style="height:82%"></div><div class="bar-gold" style="height:76%"></div></div><div class="bar-day">الثلاثاء</div></div>
-          <div class="bar-col today"><div class="bar-wrap"><div class="bar-grey" style="height:90%"></div><div class="bar-gold" style="height:87%"></div></div><div class="bar-day">الأربعاء</div></div>
-          <div class="bar-col"><div class="bar-wrap"><div class="bar-grey" style="height:74%"></div><div class="bar-gold" style="height:70%"></div></div><div class="bar-day">الخميس</div></div>
-          <div class="bar-col"><div class="bar-wrap"><div class="bar-grey" style="height:46%"></div><div class="bar-gold" style="height:40%"></div></div><div class="bar-day">الجمعة</div></div>
-          <div class="bar-col"><div class="bar-wrap"><div class="bar-grey" style="height:95%"></div><div class="bar-gold" style="height:91%"></div></div><div class="bar-day">السبت</div></div>
-          <div class="bar-col"><div class="bar-wrap"><div class="bar-grey" style="height:62%"></div><div class="bar-gold" style="height:58%"></div></div><div class="bar-day">الأحد</div></div>
-        </div>
-      </div>
+      <p class="no-data" style="color:var(--muted);text-align:center;margin:32px 0">لا توجد بيانات حالياً</p>
     </div>
 
   </div>
@@ -642,52 +611,9 @@
         <button type="button" class="att-chip" role="radio" aria-checked="false" data-cat="الشباب">🟠 الشباب</button>
       </div>
 
-      <!-- قائمة اللاعبين — صفوف تجريبية تُستبدل لاحقاً ببيانات الـ backend. data-category هو مفتاح التصفية -->
-      <div class="att-list" id="attList">
-        <div class="att-row" data-category="البراعم">
-          <div class="a-name">عبدالله الغامدي <span class="att-cat">البراعم</span></div>
-          <div class="att-toggles">
-            <button type="button" class="att-toggle present active">حاضر</button>
-            <button type="button" class="att-toggle absent">غائب</button>
-          </div>
-        </div>
-        <div class="att-row" data-category="الابتدائية">
-          <div class="a-name">سعد القحطاني <span class="att-cat">الابتدائية</span></div>
-          <div class="att-toggles">
-            <button type="button" class="att-toggle present active">حاضر</button>
-            <button type="button" class="att-toggle absent">غائب</button>
-          </div>
-        </div>
-        <div class="att-row" data-category="المتوسطة">
-          <div class="a-name">فهد الشهري <span class="att-cat">المتوسطة</span></div>
-          <div class="att-toggles">
-            <button type="button" class="att-toggle present active">حاضر</button>
-            <button type="button" class="att-toggle absent">غائب</button>
-          </div>
-        </div>
-        <div class="att-row" data-category="الشباب">
-          <div class="a-name">ناصر العتيبي <span class="att-cat">الشباب</span></div>
-          <div class="att-toggles">
-            <button type="button" class="att-toggle present active">حاضر</button>
-            <button type="button" class="att-toggle absent">غائب</button>
-          </div>
-        </div>
-        <div class="att-row" data-category="البراعم">
-          <div class="a-name">يوسف الدوسري <span class="att-cat">البراعم</span></div>
-          <div class="att-toggles">
-            <button type="button" class="att-toggle present active">حاضر</button>
-            <button type="button" class="att-toggle absent">غائب</button>
-          </div>
-        </div>
-        <div class="att-row" data-category="المتوسطة">
-          <div class="a-name">تركي الحربي <span class="att-cat">المتوسطة</span></div>
-          <div class="att-toggles">
-            <button type="button" class="att-toggle present active">حاضر</button>
-            <button type="button" class="att-toggle absent">غائب</button>
-          </div>
-        </div>
-      </div>
-      <div class="att-empty" id="attEmpty" style="display:none">لا يوجد لاعبون في هذه الفئة.</div>
+      <!-- قائمة اللاعبين — تُملأ ديناميكياً ببيانات الـ backend. data-category هو مفتاح التصفية -->
+      <div class="att-list" id="attList"></div>
+      <div class="att-empty" id="attEmpty">لا يوجد لاعبين.</div>
     </div>
   </section>
 
