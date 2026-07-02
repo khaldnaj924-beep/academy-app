@@ -663,14 +663,14 @@
         <button type="button" class="target-chip" data-type="إشعار عام">📢 إشعار عام</button>
       </div>
       <div id="matchDetails" style="display:none;margin-bottom:16px">
-        <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
-          <div>
+        <div style="display:flex;flex-direction:row;gap:12px;width:100%">
+          <div style="flex:1;min-width:0">
             <span class="alert-field-label">وقت المباراة</span>
-            <input type="time" id="matchTime" class="alert-textarea" style="min-height:unset;height:54px;padding:0 16px">
+            <input type="time" id="matchTime" class="alert-textarea" style="min-height:unset;height:54px;padding:0 16px;width:100%">
           </div>
-          <div>
+          <div style="flex:1;min-width:0">
             <span class="alert-field-label">مكان المباراة</span>
-            <input type="text" id="matchLocation" class="alert-textarea" style="min-height:unset;height:54px;padding:0 16px" placeholder="مثال: ملعب الأكاديمية">
+            <input type="text" id="matchLocation" class="alert-textarea" style="min-height:unset;height:54px;padding:0 16px;width:100%" placeholder="مثال: ملعب الأكاديمية">
           </div>
         </div>
       </div>
