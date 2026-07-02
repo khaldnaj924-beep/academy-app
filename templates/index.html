@@ -659,7 +659,7 @@
       <!-- قائمة اللاعبين — تُملأ ديناميكياً من اللاعبين المقبولين. data-category هو مفتاح التصفية -->
       <div class="att-list" id="attList">
         {% for p in approved_list %}
-        <div class="att-row" data-category="{{ p.category }}" data-id="{{ p.player_id }}">
+        <div class="att-row" data-category="{{ p.category }}" data-id="{{ p.player_id }}" data-row="{{ p.row_index }}" data-name="{{ p.name }}">
           <div class="a-name">{{ p.name }} <span class="att-cat">{{ p.category }}</span></div>
           <div class="att-toggles">
             <button type="button" class="att-toggle present{% if p.today_status == 'حاضر' %} active{% endif %}">حاضر</button>
@@ -669,6 +669,15 @@
         {% endfor %}
       </div>
       <div class="att-empty" id="attEmpty"{% if approved_list %} style="display:none"{% endif %}>لا يوجد لاعبين.</div>
+
+      <!-- زر حفظ التحضير — يرسل حالة جميع اللاعبين المحدَّدة إلى /save_dashboard -->
+      <div style="display:flex;align-items:center;gap:14px;flex-wrap:wrap;margin-top:6px">
+        <button type="button" class="alert-send" id="attSubmit">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>
+          حفظ التحضير
+        </button>
+        <span id="attSubmitStatus" style="font-size:14px;font-weight:700;color:var(--muted)"></span>
+      </div>
     </div>
   </section>
 
@@ -916,6 +925,59 @@
         presentBtn.classList.toggle('active',prevPresent);
         absentBtn.classList.toggle('active',prevAbsent);
         alert('خطأ في الاتصال بالسيرفر');
+      });
+    });
+  }
+
+  // زر حفظ التحضير — يجمع حالة كل اللاعبين ويرسلها دفعة واحدة إلى /save_dashboard
+  var attSubmit=document.getElementById('attSubmit'),
+      attSubmitStatus=document.getElementById('attSubmitStatus');
+  if(attSubmit && attList){
+    attSubmit.addEventListener('click',function(){
+      var players=[];
+      attList.querySelectorAll('.att-row').forEach(function(row){
+        var present=row.querySelector('.att-toggle.present').classList.contains('active'),
+            absent=row.querySelector('.att-toggle.absent').classList.contains('active');
+        if(!present && !absent) return; // لم تُحدَّد حالته بعد — لا نرسله حتى لا يُسجَّل غائباً بالخطأ
+        players.push({
+          row_index:parseInt(row.getAttribute('data-row'),10)||0,
+          name:row.getAttribute('data-name')||'',
+          height:'',
+          weight:'',
+          status:present?'حاضر':'غائب'
+        });
+      });
+      if(!players.length){
+        attSubmitStatus.textContent='❌ لم تُحدَّد حالة أي لاعب بعد';
+        attSubmitStatus.style.color='var(--red)';
+        return;
+      }
+      var d=new Date(),
+          today=d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');
+      attSubmit.disabled=true;
+      attSubmitStatus.textContent='⏳ جاري الحفظ...';
+      attSubmitStatus.style.color='var(--muted)';
+      fetch('/save_dashboard',{
+        method:'POST',
+        headers:{'Content-Type':'application/json'},
+        body:JSON.stringify({date:today,announcement:'',players:players})
+      })
+      .then(function(r){return r.json();})
+      .then(function(res){
+        attSubmit.disabled=false;
+        if(res.success){
+          attSubmitStatus.textContent='✅ '+res.message;
+          attSubmitStatus.style.color='var(--green)';
+          setTimeout(function(){attSubmitStatus.textContent='';},4000);
+        }else{
+          attSubmitStatus.textContent='❌ '+(res.message||'حدث خطأ أثناء الحفظ');
+          attSubmitStatus.style.color='var(--red)';
+        }
+      })
+      .catch(function(){
+        attSubmit.disabled=false;
+        attSubmitStatus.textContent='❌ خطأ في الاتصال بالسيرفر';
+        attSubmitStatus.style.color='var(--red)';
       });
     });
   }
