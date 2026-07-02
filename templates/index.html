@@ -313,6 +313,19 @@
   .req-btn.accept:hover{background:#059669;border-color:#059669;color:#fff}
   .req-btn.reject:hover{background:#dc2626;border-color:#dc2626;color:#fff}
   .req-btn:disabled{opacity:.5;cursor:not-allowed}
+  @media (max-width:600px){
+    .req-card{flex-direction:column;align-items:stretch;gap:14px}
+    .req-actions{width:100%}
+    .req-btn{flex:1;text-align:center}
+  }
+
+  /* ============ MATCH FIELDS (notifications) ============ */
+  .match-fields{display:flex;flex-direction:row;gap:12px;width:100%}
+  .match-field{flex:1;min-width:0}
+  @media (max-width:600px){
+    .match-fields{flex-direction:column}
+    .match-field{width:100%}
+  }
 
   /* ============ RESPONSIVE ============ */
   @media (max-width:920px){
@@ -696,12 +709,12 @@
         <button type="button" class="target-chip" data-type="إشعار عام">📢 إشعار عام</button>
       </div>
       <div id="matchDetails" style="display:none;margin-bottom:16px">
-        <div style="display:flex;flex-direction:row;gap:12px;width:100%">
-          <div style="flex:1;min-width:0">
+        <div class="match-fields">
+          <div class="match-field">
             <span class="alert-field-label">وقت المباراة</span>
             <input type="time" id="matchTime" class="alert-textarea" style="min-height:unset;height:54px;padding:0 16px;width:100%">
           </div>
-          <div style="flex:1;min-width:0">
+          <div class="match-field">
             <span class="alert-field-label">مكان المباراة</span>
             <input type="text" id="matchLocation" class="alert-textarea" style="min-height:unset;height:54px;padding:0 16px;width:100%" placeholder="مثال: ملعب الأكاديمية">
           </div>
