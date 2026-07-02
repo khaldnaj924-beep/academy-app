@@ -1,4 +1,4 @@
-from flask import Flask, request, jsonify, send_file, render_template
+from flask import Flask, request, jsonify, render_template
 from flask_cors import CORS
 import gspread
 from datetime import datetime, timedelta
@@ -105,15 +105,6 @@ def invalidate_cache():
     with _cache_lock:
         _cache['sheet_values'] = None
         _cache['sheet_ts'] = 0
-
-def _send_absence_webhooks(webhook_url, payloads):
-    """إرسال تنبيهات الغياب للـ Webhook في مسار خلفي دون تعطيل استجابة الواجهة."""
-    import requests as http_requests
-    for payload in payloads:
-        try:
-            http_requests.post(webhook_url, json=payload, timeout=5)
-        except Exception:
-            pass
 
 # مسار عرض لوحة الإدارة وحساب الإحصائيات الديناميكية
 @app.route('/')
