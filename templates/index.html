@@ -529,7 +529,7 @@
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3 2 20h20L12 3Z"/><path d="M12 10v4"/><path d="M12 17.5v.01"/></svg>
       </div>
       <div class="sc-label">الاشتراكات والاشتراكات الملغاة</div>
-      <div class="sc-value">0</div>
+      <div class="sc-value">{{ expired_subscriptions }}</div>
     </div>
 
     <!-- TOP-LEFT — new requests (gold) -->
@@ -538,23 +538,29 @@
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="m3 7 9 6 9-6"/></svg>
       </div>
       <div class="sc-label">طلبات الالتحاق الجديدة (الانتظار)</div>
-      <div class="sc-value">0</div>
+      <div class="sc-value">{{ new_requests }}</div>
     </div>
 
-    <!-- BOTTOM-RIGHT — active players donut -->
+    <!-- BOTTOM-RIGHT — active players total -->
     <div class="panel donut-panel">
       <div class="panel-title"><span class="tdot"></span> حالة اللاعبين النشطين</div>
-      <p class="no-data" style="color:var(--muted);text-align:center;margin:32px 0">لا توجد بيانات حالياً</p>
+      <div class="stat-big" style="text-align:center;margin:32px 0">
+        <div class="stat-big-value" style="font-size:44px;font-weight:800;color:var(--gold)">{{ active_players }}</div>
+        <div class="stat-big-label" style="color:var(--muted);margin-top:6px">إجمالي اللاعبين النشطين</div>
+      </div>
     </div>
 
-    <!-- BOTTOM-LEFT — live attendance bar chart -->
+    <!-- BOTTOM-LEFT — today's live attendance -->
     <div class="panel chart-panel">
       <div class="chart-top">
         <div>
           <div class="panel-title"><span class="tdot"></span> تحضير اليوم المباشر</div>
         </div>
       </div>
-      <p class="no-data" style="color:var(--muted);text-align:center;margin:32px 0">لا توجد بيانات حالياً</p>
+      <div class="stat-big" style="text-align:center;margin:32px 0">
+        <div class="stat-big-value" style="font-size:44px;font-weight:800;color:var(--gold)">{{ today_attendance }}</div>
+        <div class="stat-big-label" style="color:var(--muted);margin-top:6px">حاضر اليوم</div>
+      </div>
     </div>
 
   </div>
@@ -611,9 +617,19 @@
         <button type="button" class="att-chip" role="radio" aria-checked="false" data-cat="الشباب">🟠 الشباب</button>
       </div>
 
-      <!-- قائمة اللاعبين — تُملأ ديناميكياً ببيانات الـ backend. data-category هو مفتاح التصفية -->
-      <div class="att-list" id="attList"></div>
-      <div class="att-empty" id="attEmpty">لا يوجد لاعبين.</div>
+      <!-- قائمة اللاعبين — تُملأ ديناميكياً من اللاعبين المقبولين. data-category هو مفتاح التصفية -->
+      <div class="att-list" id="attList">
+        {% for p in approved_list %}
+        <div class="att-row" data-category="{{ p.category }}" data-row="{{ p.row_index }}">
+          <div class="a-name">{{ p.name }} <span class="att-cat">{{ p.category }}</span></div>
+          <div class="att-toggles">
+            <button type="button" class="att-toggle present active">حاضر</button>
+            <button type="button" class="att-toggle absent">غائب</button>
+          </div>
+        </div>
+        {% endfor %}
+      </div>
+      <div class="att-empty" id="attEmpty"{% if approved_list %} style="display:none"{% endif %}>لا يوجد لاعبين.</div>
     </div>
   </section>
 

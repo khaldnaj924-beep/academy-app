@@ -131,6 +131,7 @@ def view_dashboard():
         new_requests = 0
         expired_subscriptions = 0
         pending_list = []
+        approved_list = []
 
         # تصفح شيت اللاعبين لحساب الإحصائيات
         for idx, row in enumerate(all_records[1:], start=2):
@@ -140,6 +141,21 @@ def view_dashboard():
                 # 1. اللاعبين النشطين
                 if status == 'Approved':
                     active_players += 1
+
+                    # قائمة اللاعبين المقبولين لعرضها في تبويب التحضير
+                    dob_raw = row[2] if len(row) > 2 else ""
+                    birth_year = ""
+                    if dob_raw:
+                        parts = dob_raw.replace("-", "/").split("/")
+                        if len(parts) == 3:
+                            birth_year = parts[0] if len(parts[0]) == 4 else parts[2]
+                        elif len(parts) == 1:
+                            birth_year = parts[0]
+                    approved_list.append({
+                        "row_index": idx,
+                        "name": row[1] if len(row) > 1 else "",
+                        "category": get_age_category(birth_year)
+                    })
 
                     # 4. حساب الاشتراكات المنتهية (العمود التاسع Index 8)
                     end_date_raw = row[8].strip() if len(row) > 8 else ""
@@ -180,7 +196,8 @@ def view_dashboard():
                                today_attendance=today_attendance, 
                                new_requests=new_requests,
                                expired_subscriptions=expired_subscriptions,
-                               pending_list=pending_list)
+                               pending_list=pending_list,
+                               approved_list=approved_list)
     except Exception as e:
         return jsonify({"success": False, "message": str(e)}), 500
 
