@@ -577,7 +577,7 @@ def save_dashboard():
 
         return jsonify({
             "success": True,
-            "message": f"تم حفظ {saved_count} سجل ميداني بنجاح! 🏆"
+            "message": f"تم إرسال {saved_count} سجل ميداني بنجاح! 🏆"
         }), 200
     except gspread.exceptions.APIError as e:
         msg = str(e)
