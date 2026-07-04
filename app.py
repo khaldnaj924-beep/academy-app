@@ -637,6 +637,29 @@ def send_notification():
                                             notif_type=notif_type, message=message):
                     sent += 1
 
+        # 🔔 إشعار n8n بالإشعار العام نفسه (خيط منفصل حتى لا يبطئ الاستجابة)
+        def _notify_general(nt, tg, msg, dt):
+            try:
+                requests.post(
+                    "https://n8n.roboualain.site/webhook/general-notification",
+                    json={
+                        "نوع_الإشعار": nt,
+                        "الفئة": tg,
+                        "الملاحظة": msg,
+                        "التاريخ": dt
+                    },
+                    timeout=8
+                )
+            except Exception as ex:
+                print(f"فشل إرسال إشعار n8n العام: {ex}")
+
+        try:
+            threading.Thread(target=_notify_general,
+                             args=(notif_type, target, message, today_str),
+                             daemon=True).start()
+        except Exception as ex:
+            print(f"[n8n Thread] خطأ: {ex}")
+
         return jsonify({"success": True, "message": f"تم إرسال الإشعار لـ {sent} ولي أمر ✅"}), 200
     except Exception as e:
         return jsonify({"success": False, "message": str(e)}), 500
