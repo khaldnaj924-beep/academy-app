@@ -5,6 +5,7 @@ from datetime import datetime, timedelta
 import threading
 import re
 import os
+import requests
 from dotenv import load_dotenv
 
 # 🔐 تحميل متغيرات البيئة من ملف .env (إن وُجد)
@@ -458,6 +459,24 @@ def renew_subscription():
     except Exception as e:
         return jsonify({"success": False, "message": str(e)}), 500
 
+def trigger_n8n_notification(player_name, phone_number, status, date):
+    """
+    يرسل طلب لـ n8n webhook فور حفظ تحضير لاعب، عشان يرسل رسالة واتساب فورية
+    لولي الأمر بدون انتظار جدولة زمنية.
+    """
+    try:
+        webhook_url = "https://n8n.roboualain.site/webhook/absence-notification"
+        payload = {
+            "اسم اللاعب": player_name,
+            "رقم الواتساب": phone_number,
+            "الحالة": status,
+            "التاريخ": date
+        }
+        requests.post(webhook_url, json=payload, timeout=5)
+    except Exception as e:
+        # لا نوقف حفظ التحضير حتى لو فشل الإشعار
+        print(f"فشل إرسال إشعار n8n: {e}")
+
 # 6. مسار حفظ التحضير والقياسات
 @app.route('/save_dashboard', methods=['POST'])
 def save_dashboard():
@@ -483,6 +502,7 @@ def save_dashboard():
         att_updates = []    # تحديث سجلات تحضير موجودة (نفس التاريخ + معرّف اللاعب)
         att_appends = []    # سجلات تحضير جديدة
         saved_count = 0
+        notify_list = []    # اللاعبون المحفوظون بنجاح لإشعار n8n الفوري
 
         # قيم الشيت الرئيسي لاستخراج معرّف اللاعب (العمود الأول) حسب رقم الصف
         main_values = get_sheet_values_cached()
@@ -535,6 +555,10 @@ def save_dashboard():
                     att_appends.append([date, name, status, height, weight, announcement, player_id])
                 saved_count += 1
 
+                # 📱 رقم واتساب ولي الأمر من العمود الرابع (D) بالشيت الرئيسي
+                phone = mrow[3].strip() if len(mrow) > 3 and mrow[3] else ""
+                notify_list.append({'name': name, 'phone': phone, 'status': status})
+
             if cell_updates:
                 sheet.batch_update(cell_updates)
             if att_updates:
@@ -543,37 +567,15 @@ def save_dashboard():
                 attendance_sheet.append_rows(att_appends)
             invalidate_cache()
 
-        # 🔔 إرسال تنبيهات الغياب في الخلفية (لا يبطئ الاستجابة)
-        def _send_webhooks(players_snapshot, date_snapshot, cached_snapshot):
-            import requests as http_requests
-            WEBHOOK_URL = "https://n8n.roboualain.site/webhook/e71b2af4-d593-45ae-b86a-a5ff4226c075"
-            for p in players_snapshot:
-                status = p.get('status', '')
-                if status not in ('غائب', 'حاضر'):
-                    continue
-                try:
-                    ridx = int(p.get('row_index', 0))
-                    row_data = cached_snapshot[ridx - 1] if 0 < ridx <= len(cached_snapshot) else []
-                    phone = row_data[3] if len(row_data) > 3 else ""
-                    http_requests.post(WEBHOOK_URL, json={
-                        "name": p.get('name', ''),
-                        "phone": phone,
-                        "date": date_snapshot,
-                        "status": status
-                    }, timeout=8)
-                except Exception as ex:
-                    print(f"[Webhook] فشل الإرسال: {ex}")
-
-        try:
-            cached_snap = get_sheet_values_cached()
-            t = threading.Thread(
-                target=_send_webhooks,
-                args=(list(players), date, cached_snap),
-                daemon=True
-            )
-            t.start()
-        except Exception as ex:
-            print(f"[Webhook Thread] خطأ: {ex}")
+        # 🔔 إشعار n8n الفوري لكل لاعب تم حفظ تحضيره بنجاح (خيط منفصل حتى لا تتأخر الاستجابة)
+        if notify_list:
+            def _notify_n8n(items, date_snapshot):
+                for it in items:
+                    trigger_n8n_notification(it['name'], it['phone'], it['status'], date_snapshot)
+            try:
+                threading.Thread(target=_notify_n8n, args=(notify_list, date), daemon=True).start()
+            except Exception as ex:
+                print(f"[n8n Thread] خطأ: {ex}")
 
         return jsonify({
             "success": True,
@@ -601,7 +603,7 @@ def send_notification():
         target = sanitize_input(data.get('target', 'الكل'), max_len=50)
         message = sanitize_input(data.get('message', ''), max_len=500)
 
-        WEBHOOK_URL = "https://n8n.roboualain.site/webhook/e71b2af4-d593-45ae-b86a-a5ff4226c075"
+        WEBHOOK_URL = "https://n8n.roboualain.site/webhook/absence-notification"
 
         all_records = get_sheet_values_cached()
         sent = 0
