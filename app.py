@@ -242,7 +242,7 @@ def register_player():
 
             status = 'Pending'
             join_date = datetime.now().strftime("%Y-%m-%d")
-            row_data = [new_id, name, birth_year, phone, "", "", status, join_date, "غير محدد"]
+            row_data = [new_id, name, birth_year, phone, "", "", status, join_date, ""]
             sheet.append_row(row_data)
             invalidate_cache()
 
