@@ -459,10 +459,11 @@ def renew_subscription():
     except Exception as e:
         return jsonify({"success": False, "message": str(e)}), 500
 
-def trigger_n8n_notification(player_name, phone_number, status, date):
+def trigger_n8n_notification(player_name, phone_number, status, date, notif_type=None, message=None):
     """
     يرسل طلب لـ n8n webhook فور حفظ تحضير لاعب، عشان يرسل رسالة واتساب فورية
     لولي الأمر بدون انتظار جدولة زمنية.
+    تُستخدم أيضاً للإشعارات العامة (الحالة = "إشعار") مع نوع الإشعار ونص الرسالة.
     """
     try:
         webhook_url = "https://n8n.roboualain.site/webhook/absence-notification"
@@ -472,10 +473,16 @@ def trigger_n8n_notification(player_name, phone_number, status, date):
             "الحالة": status,
             "التاريخ": date
         }
+        if notif_type is not None:
+            payload["نوع الإشعار"] = notif_type
+        if message is not None:
+            payload["الرسالة"] = message
         requests.post(webhook_url, json=payload, timeout=5)
+        return True
     except Exception as e:
         # لا نوقف حفظ التحضير حتى لو فشل الإشعار
         print(f"فشل إرسال إشعار n8n: {e}")
+        return False
 
 # 6. مسار حفظ التحضير والقياسات
 @app.route('/save_dashboard', methods=['POST'])
@@ -594,7 +601,6 @@ def send_notification():
     err = require_sheet()
     if err: return err
     try:
-        import requests as http_requests
         data = request.get_json(silent=True)
         if not data:
             return jsonify({"success": False, "message": "البيانات غير صالحة"}), 400
@@ -603,8 +609,7 @@ def send_notification():
         target = sanitize_input(data.get('target', 'الكل'), max_len=50)
         message = sanitize_input(data.get('message', ''), max_len=500)
 
-        WEBHOOK_URL = "https://n8n.roboualain.site/webhook/absence-notification"
-
+        today_str = datetime.now().strftime("%Y-%m-%d")
         all_records = get_sheet_values_cached()
         sent = 0
         for row in all_records[1:]:
@@ -627,17 +632,10 @@ def send_notification():
                 if not phone:
                     continue
 
-                try:
-                    http_requests.post(WEBHOOK_URL, json={
-                        "name": name,
-                        "phone": phone,
-                        "type": notif_type,
-                        "message": message,
-                        "status": "إشعار"
-                    }, timeout=5)
+                # نفس صيغة إشعارات التحضير (مفاتيح عربية موحّدة) مع تمييز الحالة بـ "إشعار"
+                if trigger_n8n_notification(name, phone, "إشعار", today_str,
+                                            notif_type=notif_type, message=message):
                     sent += 1
-                except Exception:
-                    pass
 
         return jsonify({"success": True, "message": f"تم إرسال الإشعار لـ {sent} ولي أمر ✅"}), 200
     except Exception as e:
