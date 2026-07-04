@@ -610,34 +610,9 @@ def send_notification():
         message = sanitize_input(data.get('message', ''), max_len=500)
 
         today_str = datetime.now().strftime("%Y-%m-%d")
-        all_records = get_sheet_values_cached()
-        sent = 0
-        for row in all_records[1:]:
-            if len(row) >= 7 and row[6] == 'Approved':
-                if target != 'الكل':
-                    dob_raw = row[2] if len(row) > 2 else ""
-                    birth_year = ""
-                    if dob_raw:
-                        parts = dob_raw.replace("-", "/").split("/")
-                        if len(parts) == 3:
-                            birth_year = parts[0] if len(parts[0]) == 4 else parts[2]
-                        elif len(parts) == 1:
-                            birth_year = parts[0]
-                    category = get_age_category(birth_year)
-                    if category != target:
-                        continue
 
-                phone = row[3] if len(row) > 3 else ""
-                name = row[1] if len(row) > 1 else ""
-                if not phone:
-                    continue
-
-                # نفس صيغة إشعارات التحضير (مفاتيح عربية موحّدة) مع تمييز الحالة بـ "إشعار"
-                if trigger_n8n_notification(name, phone, "إشعار", today_str,
-                                            notif_type=notif_type, message=message):
-                    sent += 1
-
-        # 🔔 إشعار n8n بالإشعار العام نفسه (خيط منفصل حتى لا يبطئ الاستجابة)
+        # 🔔 إشعار n8n بالإشعار العام (خيط منفصل حتى لا يبطئ الاستجابة)
+        # التوزيع على أولياء الأمور يتولاه workflow الـ general-notification في n8n
         def _notify_general(nt, tg, msg, dt):
             try:
                 requests.post(
@@ -660,7 +635,7 @@ def send_notification():
         except Exception as ex:
             print(f"[n8n Thread] خطأ: {ex}")
 
-        return jsonify({"success": True, "message": f"تم إرسال الإشعار لـ {sent} ولي أمر ✅"}), 200
+        return jsonify({"success": True, "message": "تم إرسال الإشعار بنجاح ✅"}), 200
     except Exception as e:
         return jsonify({"success": False, "message": str(e)}), 500
 
