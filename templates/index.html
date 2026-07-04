@@ -753,7 +753,7 @@
       <!-- Field 1 — full name -->
       <div class="field">
         <label>اسم اللاعب الثلاثي</label>
-        <input type="text" placeholder="مثال: عبدالله محمد الغامدي" required>
+        <input type="text" id="regName" placeholder="مثال: عبدالله محمد الغامدي" required>
       </div>
 
       <!-- Field 2 — birth year (open dropdown) -->
@@ -803,8 +803,10 @@
       <!-- Field 3 — guardian phone -->
       <div class="field">
         <label>رقم ولي الأمر</label>
-        <input type="tel" inputmode="numeric" placeholder="05xxxxxxxx" required>
+        <input type="tel" id="regPhone" inputmode="numeric" placeholder="05xxxxxxxx" required>
       </div>
+
+      <div id="regErr" style="display:none;background:#fee2e2;color:#b91c1c;border-radius:10px;padding:10px 14px;font-weight:700;font-size:14px;margin-top:10px;text-align:center"></div>
 
       <div class="ok-msg" id="okMsg">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M21.6 7.5 9.7 19.4l-5.3-5.3"/></svg>
@@ -1040,9 +1042,41 @@
     });
   }
 
-  form.addEventListener('submit',function(e){e.preventDefault();okMsg.classList.add('show');setTimeout(function(){close();},2000);});
+  // إرسال نموذج التسجيل إلى /register — النجاح يُعرض فقط عند رد فعلي من السيرفر
+  var regName=document.getElementById('regName'),regPhone=document.getElementById('regPhone'),
+      regErr=document.getElementById('regErr'),regSubmit=form.querySelector('button[type="submit"]');
+  form.addEventListener('submit',function(e){
+    e.preventDefault();
+    regErr.style.display='none';
+    regSubmit.disabled=true;
+    fetch('/register',{
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({
+        name:regName.value.trim(),
+        birth_year:yVal.textContent.trim(),
+        phone:regPhone.value.trim()
+      })
+    })
+    .then(function(r){return r.json();})
+    .then(function(res){
+      regSubmit.disabled=false;
+      if(res.success){
+        okMsg.classList.add('show');
+        // إعادة تحميل الصفحة حتى يظهر اللاعب الجديد في قائمة الطلبات
+        setTimeout(function(){close();location.reload();},1500);
+      }else{
+        regErr.textContent=res.message||'حدث خطأ أثناء التسجيل';
+        regErr.style.display='block';
+      }
+    })
+    .catch(function(){
+      regSubmit.disabled=false;
+      regErr.textContent='خطأ في الاتصال بالسيرفر';
+      regErr.style.display='block';
+    });
+  });
 
-  // mockup state: registration panel starts open over the dashboard
   if(scrim.classList.contains('open')) document.body.style.overflow='hidden';
 
   // ===== Pending requests: accept / reject =====
