@@ -243,10 +243,8 @@ def register_player():
             status = 'Pending'
             join_date = datetime.now().strftime("%Y-%m-%d")
             row_data = [new_id, name, birth_year, phone, "", "", status, join_date, ""]
-            # append_row يحسب حدود الجدول بشكل خاطئ مع الخلايا الفارغة فيكتب البيانات بشكل متدرّج،
-            # لذا نحدد الصف التالي من العمود A ونكتب فيه مباشرة
-            next_row = len(sheet.col_values(1)) + 1
-            sheet.update(range_name=f'A{next_row}', values=[row_data])
+            # table_range='A1' يثبّت بداية الجدول حتى لا تنحرف الكتابة مع الخلايا الفارغة
+            sheet.append_row(row_data, value_input_option='RAW', insert_data_option='INSERT_ROWS', table_range='A1')
             invalidate_cache()
 
         return jsonify({"success": True, "message": "تم إرسال الطلب بنجاح!"}), 200
