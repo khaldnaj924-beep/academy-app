@@ -5,6 +5,7 @@ from datetime import datetime, timedelta
 import threading
 import re
 import os
+import time
 import requests
 from dotenv import load_dotenv
 
@@ -578,8 +579,10 @@ def save_dashboard():
         # 🔔 إشعار n8n الفوري لكل لاعب تم حفظ تحضيره بنجاح (خيط منفصل حتى لا تتأخر الاستجابة)
         if notify_list:
             def _notify_n8n(items, date_snapshot):
-                for it in items:
+                for i, it in enumerate(items):
                     trigger_n8n_notification(it['name'], it['phone'], it['status'], date_snapshot)
+                    if i < len(items) - 1:
+                        time.sleep(35)
             try:
                 threading.Thread(target=_notify_n8n, args=(notify_list, date), daemon=True).start()
             except Exception as ex:
