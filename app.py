@@ -619,16 +619,32 @@ def send_notification():
         # التوزيع على أولياء الأمور يتولاه workflow الـ general-notification في n8n
         def _notify_general(nt, tg, msg, dt):
             try:
-                requests.post(
-                    "https://n8n.roboualain.site/webhook/general-notification",
-                    json={
-                        "نوع_الإشعار": nt,
-                        "الفئة": tg,
-                        "الملاحظة": msg,
-                        "التاريخ": dt
-                    },
-                    timeout=8
-                )
+                with _sheets_lock:
+                    all_rows = sheet.get_all_records()
+                players = []
+                for row in all_rows:
+                    phone = str(row.get('رقم الواتساب', '')).strip()
+                    name = str(row.get('اسم اللاعب', '')).strip()
+                    status = str(row.get('حالة الطلب', '')).strip()
+                    if not phone or not name:
+                        continue
+                    if status != 'Approved':
+                        continue
+                    players.append({'name': name, 'phone': phone})
+                for i, player in enumerate(players):
+                    requests.post(
+                        "https://n8n.roboualain.site/webhook/general-notification",
+                        json={
+                            "نوع_الإشعار": nt,
+                            "الملاحظة": msg,
+                            "التاريخ": dt,
+                            "اسم اللاعب": player['name'],
+                            "رقم الواتساب": player['phone']
+                        },
+                        timeout=8
+                    )
+                    if i < len(players) - 1:
+                        time.sleep(35)
             except Exception as ex:
                 print(f"فشل إرسال إشعار n8n العام: {ex}")
 
